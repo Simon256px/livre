@@ -4,6 +4,8 @@
 
 Livre est une application de bureau (Electron) qui prend vos PDF — et bientôt EPUB, MOBI, TXT — et les re-met en page comme un vrai livre : texture papier, typographie soignée, modes lumière, Bionic Reading. 100 % offline, aucun compte, aucune donnée envoyée.
 
+> 🗺️ La liste complète des fonctionnalités envisagées et leur avancement : [ROADMAP.md](ROADMAP.md)
+
 ## ✨ Fonctionnalités prévues
 
 ### Lecture & transformation du PDF
