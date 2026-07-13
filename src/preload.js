@@ -1,10 +1,17 @@
 const { contextBridge, ipcRenderer, webUtils } = require('electron');
 
 contextBridge.exposeInMainWorld('livre', {
-  pickPdf: () => ipcRenderer.invoke('pick-pdf'),
+  pickBooks: () => ipcRenderer.invoke('pick-books'),
   readFile: (filePath) => ipcRenderer.invoke('read-file', filePath),
   loadStore: () => ipcRenderer.invoke('load-store'),
   saveStore: (store) => ipcRenderer.invoke('save-store', store),
+  loadCache: (id) => ipcRenderer.invoke('load-cache', id),
+  saveCache: (id, data) => ipcRenderer.invoke('save-cache', id, data),
+  deleteCache: (id) => ipcRenderer.invoke('delete-cache', id),
+  exportFile: (opts) => ipcRenderer.invoke('export-file', opts),
+  toggleFullscreen: () => ipcRenderer.invoke('toggle-fullscreen'),
+  onFullscreen: (cb) => ipcRenderer.on('fullscreen', (_e, on) => cb(on)),
+  onOpenFiles: (cb) => ipcRenderer.on('open-files', (_e, paths) => cb(paths)),
   pathForFile: (file) => {
     try {
       return webUtils.getPathForFile(file);

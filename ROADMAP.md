@@ -9,33 +9,36 @@ Les cases cochées sont déjà dans la version actuelle.
 
 ## 🚀 Prochaines étapes proposées
 
-- **v0.2 — Lire confortablement** : sommaire interactif, affichage des images,
-  double page, plein écran, recherche plein texte
-- **v0.3 — Annoter** : surlignage, notes, signets, export Markdown
-- **v0.4 — Formats** : EPUB, OCR pour les PDF scannés
-- **v0.5 — Motivation** : stats quotidiennes, streaks, objectifs, RSVP
+- ~~v0.2 — Lire confortablement~~ ✅ livré
+- ~~v0.3 — Annoter~~ ✅ livré (fusionné dans la v0.2)
+- **v0.3 — OCR** : PDF scannés via Tesseract embarqué
+- **v0.4 — Confort** : dictionnaire offline, objectifs quotidiens, Pomodoro,
+  collections et tags
+- **v0.5 — Écosystème** : import/export de la bibliothèque, thèmes
+  personnalisés, import de polices
 
 ## 📚 Lecture
 
 - [x] Reflow du texte PDF (paragraphes recollés, en-têtes/pieds supprimés)
 - [x] Pagination façon livre
-- [ ] EPUB avec le même moteur de reflow
+- [x] EPUB avec le même moteur de reflow
 - [ ] OCR pour les PDF scannés
-- [ ] Affichage des images, graphiques et tableaux
-- [ ] Double page (comme un livre ouvert)
-- [ ] Défilement continu en plus de la pagination
+- [x] Affichage des images et graphiques
+- [x] Double page (comme un livre ouvert) — auto selon la fenêtre, ou forcée
+- [x] Défilement continu en plus de la pagination
 - [ ] Lecture verticale ou horizontale
-- [ ] Mode plein écran immersif
-- [ ] Chapitres détectés automatiquement avec sommaire interactif
-      (la détection des titres existe, il manque le panneau sommaire)
+- [x] Mode plein écran immersif (F11, barre escamotable)
+- [x] Chapitres détectés automatiquement avec sommaire interactif
+- [x] Ouverture directe depuis la ligne de commande (`livre chemin.pdf`)
 
 ## ✍️ Annotations
 
-- [ ] Surlignage de plusieurs couleurs
-- [ ] Notes attachées à un passage
-- [ ] Signets (bookmarks)
+- [x] Surlignage de plusieurs couleurs (sélection → palette flottante)
+- [x] Notes attachées à un passage
+- [x] Signets (bookmarks)
 - [ ] Dessin au stylet
-- [ ] Export des annotations (Markdown, PDF)
+- [x] Export des annotations en Markdown
+- [ ] Export des annotations en PDF
 - [ ] Synchronisation des annotations entre appareils
 
 ## 🧠 Aides à la lecture
@@ -52,7 +55,7 @@ Les cases cochées sont déjà dans la version actuelle.
 
 - [x] Bionic reading à intensité réglable
 - [x] Mode focus (règle de lecture)
-- [ ] Mode RSVP (un mot à la fois)
+- [x] Mode RSVP (un mot à la fois, point de fixation rouge, vitesse réglable)
 - [ ] Lecture rapide avec mise en évidence
 - [ ] Entraînement à la vitesse de lecture
 - [ ] Objectifs quotidiens
@@ -63,18 +66,18 @@ Les cases cochées sont déjà dans la version actuelle.
 - [x] Temps de lecture cumulé par livre
 - [x] Pourcentage terminé
 - [x] Estimation du temps restant
-- [ ] Temps de lecture quotidien
+- [x] Temps de lecture quotidien (graphique des 14 derniers jours)
 - [ ] Pages lues par jour
-- [ ] Vitesse moyenne (mots/minute)
-- [ ] Calendrier de lecture (streak)
-- [ ] Historique de progression
+- [x] Vitesse moyenne (mots/minute, sur 30 jours)
+- [x] Calendrier de lecture (streak)
+- [ ] Historique de progression détaillé
 
 ## 🎨 Personnalisation
 
 - [x] 4 thèmes (crème, sépia, ambre, nuit) avec grain papier
 - [x] Taille, interligne, largeur de page, justification réglables
-- [x] 4 polices (Literata, Georgia, Palatino, Segoe UI)
-- [ ] Plus de polices (Atkinson Hyperlegible, Charter, IBM Plex Serif…)
+- [x] 7 polices (Literata, Atkinson Hyperlegible, IBM Plex Serif,
+      OpenDyslexic, Georgia, Palatino, Segoe UI)
 - [ ] Import de polices personnalisées
 - [ ] Création de thèmes
 - [ ] Couleurs personnalisables
@@ -93,9 +96,9 @@ Les cases cochées sont déjà dans la version actuelle.
 ## 🔎 Recherche
 
 - [x] Livres récemment ouverts (tri par dernière ouverture)
-- [ ] Recherche plein texte ultra rapide
+- [x] Recherche plein texte dans le livre (Ctrl+F, insensible aux accents)
+- [x] Recherche dans la bibliothèque (titre et auteur)
 - [ ] Recherche dans les annotations
-- [ ] Recherche par auteur
 - [ ] Recherche par tags
 - [ ] Filtres intelligents
 
@@ -111,14 +114,14 @@ Les cases cochées sont déjà dans la version actuelle.
 
 ## 🎧 Accessibilité
 
-- [ ] Lecture vocale (Text-to-Speech)
-- [ ] Suivi visuel pendant la lecture audio
+- [x] Lecture vocale (Text-to-Speech, voix système, vitesse réglable)
+- [x] Suivi visuel pendant la lecture audio (paragraphe surligné, pages tournées)
 - [ ] Compatibilité avec les lecteurs d'écran
 - [ ] Contraste élevé
-- [ ] Police OpenDyslexic
+- [x] Police OpenDyslexic
 - [ ] Contrôle vocal
-- [ ] Navigation entièrement au clavier
-      (déjà complète dans le lecteur : flèches, espace, échap)
+- [x] Navigation au clavier dans le lecteur
+      (flèches, espace, Ctrl+F, F11, échap)
 
 ## 📱 Bibliothèque
 

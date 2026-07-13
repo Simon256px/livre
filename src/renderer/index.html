@@ -7,6 +7,12 @@
   <link rel="stylesheet" href="../../node_modules/@fontsource/literata/400.css">
   <link rel="stylesheet" href="../../node_modules/@fontsource/literata/400-italic.css">
   <link rel="stylesheet" href="../../node_modules/@fontsource/literata/700.css">
+  <link rel="stylesheet" href="../../node_modules/@fontsource/atkinson-hyperlegible/400.css">
+  <link rel="stylesheet" href="../../node_modules/@fontsource/atkinson-hyperlegible/700.css">
+  <link rel="stylesheet" href="../../node_modules/@fontsource/ibm-plex-serif/400.css">
+  <link rel="stylesheet" href="../../node_modules/@fontsource/ibm-plex-serif/700.css">
+  <link rel="stylesheet" href="../../node_modules/@fontsource/opendyslexic/400.css">
+  <link rel="stylesheet" href="../../node_modules/@fontsource/opendyslexic/700.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body data-theme="creme">
@@ -20,19 +26,28 @@
         <h1><span class="star">✦</span> Bibliothèque</h1>
       </div>
       <div class="head-actions">
+        <input type="search" id="libSearch" placeholder="Rechercher un livre…">
         <div class="theme-dots" id="libDots"></div>
-        <button class="pill primary" id="addBtn">＋ Ajouter un PDF</button>
+        <button class="pill primary" id="addBtn">＋ Ajouter</button>
       </div>
     </header>
 
     <div class="tags">
-      <span class="pill tag">Lecteur PDF</span>
+      <span class="pill tag">PDF + EPUB</span>
       <span class="pill tag">Typographie</span>
       <span class="pill tag">Bionic reading</span>
       <span class="pill tag">100 % offline</span>
     </div>
 
     <hr class="rule">
+
+    <div id="statsPanel">
+      <div class="stat"><span class="stat-num" id="statToday">0 min</span><span class="stat-label">aujourd’hui</span></div>
+      <div class="stat"><span class="stat-num" id="statStreak">0 j</span><span class="stat-label">streak 🔥</span></div>
+      <div class="stat"><span class="stat-num" id="statWpm">—</span><span class="stat-label">mots / min</span></div>
+      <div id="statChart"></div>
+    </div>
+
     <p class="stats" id="libStats"></p>
 
     <div id="bookGrid"></div>
@@ -45,25 +60,40 @@
         <path d="M33 60 Q50 75 67 60" stroke="#1D1A14" stroke-width="4" fill="none" stroke-linecap="round"/>
       </svg>
       <h2>Aucun livre pour l’instant</h2>
-      <p>Ajoute un PDF, ou dépose-le n’importe où dans la fenêtre.</p>
-      <button class="pill primary" id="emptyAddBtn">＋ Ajouter un PDF</button>
+      <p>Ajoute un PDF ou un EPUB, ou dépose-le n’importe où dans la fenêtre.</p>
+      <button class="pill primary" id="emptyAddBtn">＋ Ajouter un livre</button>
     </div>
   </section>
 
   <!-- ═══════════ Lecture ═══════════ -->
   <section id="readerScreen" class="screen hidden">
     <div class="topbar">
-      <button class="pill" id="backBtn">← Bibliothèque</button>
+      <button class="pill" id="backBtn">←</button>
+      <button class="pill icon" id="tocBtn" title="Sommaire (chapitres)">☰</button>
       <div class="title" id="readerTitle"></div>
       <div class="theme-dots" id="readerDots"></div>
-      <button class="pill icon" id="bionicBtn" title="Bionic reading"><b>B</b>io</button>
+      <button class="pill icon" id="searchBtn" title="Rechercher (Ctrl+F)">⌕</button>
+      <button class="pill icon" id="bookmarkBtn" title="Poser un signet">🔖</button>
+      <button class="pill icon" id="notesBtn" title="Notes et surlignages">🗒</button>
+      <button class="pill icon" id="ttsBtn" title="Lecture vocale">🔊</button>
+      <button class="pill icon" id="rsvpBtn" title="Lecture rapide (RSVP)">⚡</button>
+      <button class="pill icon" id="bionicBtn" title="Bionic reading"><b>B</b></button>
       <button class="pill icon" id="focusBtn" title="Mode focus">▤</button>
+      <button class="pill icon" id="fullscreenBtn" title="Plein écran (F11)">⛶</button>
       <button class="pill icon" id="settingsBtn" title="Réglages">Aa</button>
+    </div>
+
+    <div id="searchBar" class="hidden">
+      <input type="search" id="searchInput" placeholder="Rechercher dans le livre…">
+      <span id="searchCount" class="mono"></span>
+      <button class="pill icon small" id="searchPrev" title="Précédent">↑</button>
+      <button class="pill icon small" id="searchNext" title="Suivant">↓</button>
+      <button class="pill icon small" id="searchClose" title="Fermer">✕</button>
     </div>
 
     <div class="reader-main">
       <button class="nav-btn" id="prevBtn" title="Page précédente">‹</button>
-      <div class="page-frame">
+      <div class="page-frame" id="pageFrame">
         <div class="running-head" id="runningHead"></div>
         <div id="bookViewport"><div id="bookContent"></div></div>
         <div class="page-foot">
@@ -77,7 +107,30 @@
 
     <div id="focusRuler"></div>
 
-    <aside id="settingsDrawer">
+    <!-- Sommaire (gauche) -->
+    <aside id="tocDrawer" class="drawer left">
+      <div class="drawer-head">
+        <h2>☰ Sommaire</h2>
+        <button class="pill icon" id="tocCloseBtn">✕</button>
+      </div>
+      <ul id="tocList"></ul>
+    </aside>
+
+    <!-- Notes & signets (droite) -->
+    <aside id="notesDrawer" class="drawer">
+      <div class="drawer-head">
+        <h2>🗒 Notes</h2>
+        <button class="pill icon" id="notesCloseBtn">✕</button>
+      </div>
+      <button class="pill" id="exportBtn">⇣ Exporter en Markdown</button>
+      <h3 class="drawer-sub">Signets</h3>
+      <ul id="bookmarkList"></ul>
+      <h3 class="drawer-sub">Surlignages</h3>
+      <ul id="annList"></ul>
+    </aside>
+
+    <!-- Réglages (droite) -->
+    <aside id="settingsDrawer" class="drawer">
       <div class="drawer-head">
         <h2>✦ Réglages</h2>
         <button class="pill icon" id="closeDrawerBtn">✕</button>
@@ -87,9 +140,29 @@
         <label for="fontSelect">Police</label>
         <select id="fontSelect">
           <option value="literata">Literata (lecture)</option>
+          <option value="atkinson">Atkinson Hyperlegible</option>
+          <option value="plex">IBM Plex Serif</option>
+          <option value="opendyslexic">OpenDyslexic</option>
           <option value="georgia">Georgia</option>
           <option value="palatino">Palatino</option>
           <option value="segoe">Segoe UI (sans-serif)</option>
+        </select>
+      </div>
+
+      <div class="setting">
+        <label for="flowSelect">Mode de lecture</label>
+        <select id="flowSelect">
+          <option value="pages">Pages (comme un livre)</option>
+          <option value="scroll">Défilement continu</option>
+        </select>
+      </div>
+
+      <div class="setting">
+        <label for="spreadSelect">Pages affichées</label>
+        <select id="spreadSelect">
+          <option value="auto">Auto (selon la fenêtre)</option>
+          <option value="1">Une page</option>
+          <option value="2">Double page</option>
         </select>
       </div>
 
@@ -125,16 +198,60 @@
         <input type="range" id="intensityRange" min="0.2" max="0.7" step="0.05">
       </div>
 
-      <hr class="rule dotted">
-
       <div class="setting toggle-row">
         <label for="focusChk">Mode focus (règle)</label>
         <input type="checkbox" id="focusChk">
       </div>
+
+      <hr class="rule dotted">
+
+      <div class="setting">
+        <label for="ttsVoice">Voix (lecture vocale)</label>
+        <select id="ttsVoice"></select>
+      </div>
+
+      <div class="setting">
+        <label for="ttsRate">Vitesse de la voix <span class="val" id="ttsRateVal"></span></label>
+        <input type="range" id="ttsRate" min="0.7" max="1.6" step="0.05">
+      </div>
     </aside>
   </section>
 
-  <!-- ═══════════ Chargement ═══════════ -->
+  <!-- Barre de surlignage flottante -->
+  <div id="hlToolbar" class="hidden">
+    <button class="hl-dot" data-color="yellow" title="Surligner en jaune"></button>
+    <button class="hl-dot" data-color="green" title="Surligner en vert"></button>
+    <button class="hl-dot" data-color="blue" title="Surligner en bleu"></button>
+    <button class="hl-dot" data-color="pink" title="Surligner en rose"></button>
+  </div>
+
+  <!-- Popover d'édition d'un surlignage -->
+  <div id="annPopover" class="hidden">
+    <div class="pop-colors">
+      <button class="hl-dot" data-color="yellow"></button>
+      <button class="hl-dot" data-color="green"></button>
+      <button class="hl-dot" data-color="blue"></button>
+      <button class="hl-dot" data-color="pink"></button>
+      <button class="pill icon small danger" id="annDeleteBtn" title="Supprimer">🗑</button>
+    </div>
+    <textarea id="annNote" rows="3" placeholder="Ajouter une note…"></textarea>
+  </div>
+
+  <!-- Lecture rapide RSVP -->
+  <div id="rsvpOverlay" class="hidden">
+    <button class="pill icon" id="rsvpClose">✕</button>
+    <div id="rsvpWord">prêt ?</div>
+    <div class="rsvp-controls">
+      <button class="pill primary" id="rsvpPlay">▶ Lire</button>
+      <label class="mono">Vitesse <span id="rsvpWpmVal"></span>
+        <input type="range" id="rsvpWpm" min="150" max="700" step="25">
+      </label>
+      <span class="mono" id="rsvpProgress"></span>
+    </div>
+    <p class="mono rsvp-hint">espace : pause · échap : quitter</p>
+  </div>
+
+  <!-- Chargement -->
   <div id="loader" class="hidden">
     <svg class="face bounce" width="110" height="110" viewBox="0 0 100 100">
       <circle cx="50" cy="50" r="44" fill="var(--yellow)" stroke="#1D1A14" stroke-width="3"/>
@@ -145,7 +262,16 @@
     <p id="loaderText">Chargement…</p>
   </div>
 
+  <div id="toast" class="hidden"></div>
+
   <script src="../../node_modules/pdfjs-dist/build/pdf.min.js"></script>
-  <script src="app.js"></script>
+  <script src="../../node_modules/jszip/dist/jszip.min.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/extract.js"></script>
+  <script src="js/reader.js"></script>
+  <script src="js/annotations.js"></script>
+  <script src="js/media.js"></script>
+  <script src="js/library.js"></script>
+  <script src="js/boot.js"></script>
 </body>
 </html>

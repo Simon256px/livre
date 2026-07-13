@@ -1,50 +1,72 @@
 # 📖 Livre
 
-**Un lecteur de livres élégant qui transforme vos PDF en véritable expérience de lecture.**
+**Un lecteur élégant qui transforme vos PDF et EPUB en véritable expérience de lecture.**
 
-Livre est une application de bureau (Electron) qui prend vos PDF — et bientôt EPUB, MOBI, TXT — et les re-met en page comme un vrai livre : texture papier, typographie soignée, modes lumière, Bionic Reading. 100 % offline, aucun compte, aucune donnée envoyée.
+Livre est une application de bureau (Electron) qui prend vos PDF et EPUB et les re-met en page comme un vrai livre : texture papier, typographie soignée, modes lumière, Bionic Reading. 100 % offline, aucun compte, aucune donnée envoyée.
 
 > 🗺️ La liste complète des fonctionnalités envisagées et leur avancement : [ROADMAP.md](ROADMAP.md)
 
-## ✨ Fonctionnalités prévues
+## ✨ Fonctionnalités
 
-### Lecture & transformation du PDF
-- **Reflow intelligent** : extraction du texte et re-mise en page façon livre (détection des chapitres, suppression des en-têtes/pieds de page parasites)
-- **Texture livre réaliste** : grain papier, pages crème, animation de tournage de page, ombre de reliure
-- **OCR intégré** pour les PDF scannés
-- **Multi-formats** : PDF, EPUB, MOBI, TXT, Markdown
+### Lecture
+- **Reflow intelligent** : extraction du texte (pdf.js), suppression des en-têtes/pieds de page répétés, paragraphes et césures recollés, chapitres détectés
+- **PDF et EPUB** avec le même moteur de rendu, images incluses
+- **Pagination façon livre** : simple ou double page (auto selon la fenêtre), ou défilement continu
+- **Sommaire interactif**, recherche plein texte (Ctrl+F, insensible aux accents), plein écran immersif (F11)
+- **4 modes lumière** : crème, sépia, ambre (sans lumière bleue), nuit — avec grain papier
+- **Typographie fine** : 7 polices dont Literata, Atkinson Hyperlegible et OpenDyslexic ; taille, interligne, largeur, justification
 
-### Confort de lecture
-- **Bionic Reading** avec intensité réglable
-- **Modes lumière** : clair, sépia, ambre (sans lumière bleue), nuit — avec bascule automatique selon l'heure
-- **Typographie fine** : polices lecture (Literata, OpenDyslexic…), interligne, marges, justification, césure
-- **Mode focus** : règle de lecture, estompage du reste de la page
-- **Mode RSVP** : lecture rapide mot à mot, vitesse réglable
-- **Défilement automatique**
+### Vitesse & confort
+- **Bionic reading** à intensité réglable
+- **Mode focus** : règle de lecture qui suit la souris
+- **Mode RSVP** : lecture rapide mot à mot avec point de fixation, 150–700 mots/min
+- **Lecture vocale** (voix système) avec suivi visuel du paragraphe
 
-### Annotations & organisation
-- Surlignage multi-couleurs, notes en marge, marque-pages
-- **Export des annotations en Markdown**
-- **Bibliothèque visuelle** : couvertures auto-extraites, tags, progression par livre
-- **Dictionnaire au clic** (offline)
+### Annotations
+- **Surlignage 4 couleurs** (sélectionner du texte → palette flottante), notes attachées, signets
+- **Export des annotations en Markdown**, regroupées par chapitre
 
-### Motivation
-- **Statistiques** : temps lu, vitesse (mots/min), temps restant estimé, streaks
-- **Objectifs de lecture** quotidiens/hebdomadaires
-- **Reprise exacte** de la lecture à la réouverture
+### Bibliothèque & statistiques
+- Couvertures extraites automatiquement, progression, recherche par titre/auteur
+- **Reprise exacte** de la lecture, ancrée au paragraphe (survit aux changements de mise en page)
+- **Stats quotidiennes** : temps de lecture, streak 🔥, vitesse moyenne, graphique 14 jours
 
-## 🛠️ Stack technique
-
-- [Electron](https://www.electronjs.org/) — application de bureau multiplateforme
-- [pdf.js](https://mozilla.github.io/pdf.js/) — parsing et extraction de texte des PDF
-- HTML/CSS/JS pour le rendu « livre »
-
-## 🚀 Développement
+## 🚀 Utilisation
 
 ```bash
 npm install
 npm start
 ```
+
+Ajoutez des livres par le bouton **＋ Ajouter**, par glisser-déposer, ou en ligne de commande :
+
+```bash
+npx electron . chemin/vers/livre.pdf
+```
+
+### Raccourcis du lecteur
+
+| Touche | Action |
+|---|---|
+| `←` `→` / espace / molette | tourner les pages |
+| `Ctrl+F` | rechercher dans le livre |
+| `F11` | plein écran |
+| `Échap` | fermer (recherche → panneaux → lecteur) |
+
+## 🛠️ Stack technique
+
+- [Electron](https://www.electronjs.org/) — application de bureau multiplateforme
+- [pdf.js](https://mozilla.github.io/pdf.js/) — parsing et extraction de texte des PDF
+- [JSZip](https://stuk.github.io/jszip/) — lecture des EPUB
+- HTML/CSS/JS sans framework ni bundler
+
+### Hooks de test
+
+Variables d'environnement pour les tests automatisés :
+
+- `LIVRE_USERDATA=dossier` — isole le profil (store + cache)
+- `LIVRE_EVAL=script.js` — exécute un script dans le renderer et logge son résultat
+- `LIVRE_SHOT=capture.png` (+ `LIVRE_SHOT_DELAY=ms`) — capture l'écran puis quitte
 
 ## 📄 Licence
 
