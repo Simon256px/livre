@@ -1,0 +1,20 @@
+{
+  "name": "livre",
+  "productName": "Livre",
+  "version": "0.1.0",
+  "description": "Un lecteur qui transforme vos PDF en véritable expérience de lecture — texture papier, typographie soignée, bionic reading.",
+  "author": "Simon Courtois <simoncrts@protonmail.com>",
+  "license": "MIT",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "@fontsource-variable/bricolage-grotesque": "^5.2.10",
+    "@fontsource/literata": "^5.2.8",
+    "pdfjs-dist": "^3.11.174"
+  },
+  "devDependencies": {
+    "electron": "^43.1.0"
+  }
+}

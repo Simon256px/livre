@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Livre</title>
+  <link rel="stylesheet" href="../../node_modules/@fontsource-variable/bricolage-grotesque/index.css">
+  <link rel="stylesheet" href="../../node_modules/@fontsource/literata/400.css">
+  <link rel="stylesheet" href="../../node_modules/@fontsource/literata/400-italic.css">
+  <link rel="stylesheet" href="../../node_modules/@fontsource/literata/700.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-theme="creme">
+  <div id="grain"></div>
+
+  <!-- ═══════════ Bibliothèque ═══════════ -->
+  <section id="libraryScreen" class="screen">
+    <header class="lib-head">
+      <div class="brand">
+        <span class="num">.01</span>
+        <h1><span class="star">✦</span> Bibliothèque</h1>
+      </div>
+      <div class="head-actions">
+        <div class="theme-dots" id="libDots"></div>
+        <button class="pill primary" id="addBtn">＋ Ajouter un PDF</button>
+      </div>
+    </header>
+
+    <div class="tags">
+      <span class="pill tag">Lecteur PDF</span>
+      <span class="pill tag">Typographie</span>
+      <span class="pill tag">Bionic reading</span>
+      <span class="pill tag">100 % offline</span>
+    </div>
+
+    <hr class="rule">
+    <p class="stats" id="libStats"></p>
+
+    <div id="bookGrid"></div>
+
+    <div id="emptyState" class="hidden">
+      <svg class="face" width="140" height="140" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="44" fill="var(--blue)" stroke="#1D1A14" stroke-width="3"/>
+        <circle cx="35" cy="42" r="5" fill="#1D1A14"/>
+        <circle cx="65" cy="42" r="5" fill="#1D1A14"/>
+        <path d="M33 60 Q50 75 67 60" stroke="#1D1A14" stroke-width="4" fill="none" stroke-linecap="round"/>
+      </svg>
+      <h2>Aucun livre pour l’instant</h2>
+      <p>Ajoute un PDF, ou dépose-le n’importe où dans la fenêtre.</p>
+      <button class="pill primary" id="emptyAddBtn">＋ Ajouter un PDF</button>
+    </div>
+  </section>
+
+  <!-- ═══════════ Lecture ═══════════ -->
+  <section id="readerScreen" class="screen hidden">
+    <div class="topbar">
+      <button class="pill" id="backBtn">← Bibliothèque</button>
+      <div class="title" id="readerTitle"></div>
+      <div class="theme-dots" id="readerDots"></div>
+      <button class="pill icon" id="bionicBtn" title="Bionic reading"><b>B</b>io</button>
+      <button class="pill icon" id="focusBtn" title="Mode focus">▤</button>
+      <button class="pill icon" id="settingsBtn" title="Réglages">Aa</button>
+    </div>
+
+    <div class="reader-main">
+      <button class="nav-btn" id="prevBtn" title="Page précédente">‹</button>
+      <div class="page-frame">
+        <div class="running-head" id="runningHead"></div>
+        <div id="bookViewport"><div id="bookContent"></div></div>
+        <div class="page-foot">
+          <span id="pageInfo"></span>
+          <div class="progress"><div class="fill" id="readFill"></div></div>
+          <span id="timeLeft"></span>
+        </div>
+      </div>
+      <button class="nav-btn" id="nextBtn" title="Page suivante">›</button>
+    </div>
+
+    <div id="focusRuler"></div>
+
+    <aside id="settingsDrawer">
+      <div class="drawer-head">
+        <h2>✦ Réglages</h2>
+        <button class="pill icon" id="closeDrawerBtn">✕</button>
+      </div>
+
+      <div class="setting">
+        <label for="fontSelect">Police</label>
+        <select id="fontSelect">
+          <option value="literata">Literata (lecture)</option>
+          <option value="georgia">Georgia</option>
+          <option value="palatino">Palatino</option>
+          <option value="segoe">Segoe UI (sans-serif)</option>
+        </select>
+      </div>
+
+      <div class="setting">
+        <label for="sizeRange">Taille du texte <span class="val" id="sizeVal"></span></label>
+        <input type="range" id="sizeRange" min="15" max="26" step="1">
+      </div>
+
+      <div class="setting">
+        <label for="lhRange">Interligne <span class="val" id="lhVal"></span></label>
+        <input type="range" id="lhRange" min="1.4" max="2.2" step="0.05">
+      </div>
+
+      <div class="setting">
+        <label for="widthRange">Largeur de page <span class="val" id="widthVal"></span></label>
+        <input type="range" id="widthRange" min="440" max="760" step="20">
+      </div>
+
+      <div class="setting toggle-row">
+        <label for="justifyChk">Texte justifié</label>
+        <input type="checkbox" id="justifyChk">
+      </div>
+
+      <hr class="rule dotted">
+
+      <div class="setting toggle-row">
+        <label for="bionicChk">Bionic reading</label>
+        <input type="checkbox" id="bionicChk">
+      </div>
+
+      <div class="setting">
+        <label for="intensityRange">Intensité <span class="val" id="intensityVal"></span></label>
+        <input type="range" id="intensityRange" min="0.2" max="0.7" step="0.05">
+      </div>
+
+      <hr class="rule dotted">
+
+      <div class="setting toggle-row">
+        <label for="focusChk">Mode focus (règle)</label>
+        <input type="checkbox" id="focusChk">
+      </div>
+    </aside>
+  </section>
+
+  <!-- ═══════════ Chargement ═══════════ -->
+  <div id="loader" class="hidden">
+    <svg class="face bounce" width="110" height="110" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="44" fill="var(--yellow)" stroke="#1D1A14" stroke-width="3"/>
+      <circle cx="35" cy="42" r="5" fill="#1D1A14"/>
+      <circle cx="65" cy="42" r="5" fill="#1D1A14"/>
+      <path d="M33 60 Q50 75 67 60" stroke="#1D1A14" stroke-width="4" fill="none" stroke-linecap="round"/>
+    </svg>
+    <p id="loaderText">Chargement…</p>
+  </div>
+
+  <script src="../../node_modules/pdfjs-dist/build/pdf.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
