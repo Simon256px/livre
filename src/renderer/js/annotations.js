@@ -6,6 +6,7 @@
    paragraphe, donc stables quel que soit le rendu (bionic, etc.).   */
 
 let editingAnnId = null;
+let notesQuery = '';
 
 /* ---------- Sélection → surlignage ---------- */
 
@@ -166,21 +167,31 @@ function chapterOf(paraIdx) {
 function renderNotesDrawer() {
   if (!current) return;
   const b = current.book;
+  const q = foldWithMap(notesQuery.trim()).out;
+  const match = (s) => !q || foldWithMap(s).out.includes(q);
 
-  const bms = [...b.bookmarks].sort((x, y) => x.para - y.para);
-  $('#bookmarkList').innerHTML = bms.length
-    ? bms.map((bm) =>
-        `<li data-para="${bm.para}">🔖 ${esc(bm.label)}<button class="item-del" data-bm="${bm.id}" title="Supprimer">✕</button></li>`
-      ).join('')
+  const bms = [...b.bookmarks]
+    .filter((bm) => match(bm.label))
+    .sort((x, y) => x.para - y.para);
+  $('#bookmarkList').innerHTML = b.bookmarks.length
+    ? (bms.length
+        ? bms.map((bm) =>
+            `<li data-para="${bm.para}">🔖 ${esc(bm.label)}<button class="item-del" data-bm="${bm.id}" title="Supprimer">✕</button></li>`
+          ).join('')
+        : '<li class="list-empty">Aucun signet ne correspond.</li>')
     : '<li class="list-empty">Aucun signet — bouton 🔖 pour en poser un.</li>';
 
-  const anns = [...b.annotations].sort((x, y) => x.para - y.para || x.start - y.start);
-  $('#annList').innerHTML = anns.length
-    ? anns.map((a) =>
-        `<li data-para="${a.para}" class="c-${a.color}">« ${esc(snippet(a.text, 90))} »` +
-        (a.note ? `<span class="ann-note">📝 ${esc(snippet(a.note, 90))}</span>` : '') +
-        `<button class="item-del" data-ann-del="${a.id}" title="Supprimer">✕</button></li>`
-      ).join('')
+  const anns = [...b.annotations]
+    .filter((a) => match(a.text + ' ' + (a.note || '')))
+    .sort((x, y) => x.para - y.para || x.start - y.start);
+  $('#annList').innerHTML = b.annotations.length
+    ? (anns.length
+        ? anns.map((a) =>
+            `<li data-para="${a.para}" class="c-${a.color}">« ${esc(snippet(a.text, 90))} »` +
+            (a.note ? `<span class="ann-note">📝 ${esc(snippet(a.note, 90))}</span>` : '') +
+            `<button class="item-del" data-ann-del="${a.id}" title="Supprimer">✕</button></li>`
+          ).join('')
+        : '<li class="list-empty">Aucun surlignage ne correspond.</li>')
     : '<li class="list-empty">Sélectionne du texte pour surligner.</li>';
 
   $$('#bookmarkList li[data-para], #annList li[data-para]').forEach((li) =>
@@ -238,5 +249,56 @@ async function exportAnnotations() {
     defaultName: `Notes - ${safe}.md`,
     content: lines.join('\n'),
   });
+  if (path) toast(`Exporté : ${basename(path)}`);
+}
+
+/* ---------- Export PDF (PDF de notes mis en page) ---------- */
+
+async function exportAnnotationsPdf() {
+  const b = current.book;
+  if (!b.annotations.length && !b.bookmarks.length) {
+    toast('Rien à exporter pour l’instant');
+    return;
+  }
+  const HL = { yellow: '#F2C53D', green: '#63C878', blue: '#3E7BD9', pink: '#F2BFD4' };
+  let body = '';
+  if (b.bookmarks.length) {
+    body += '<h2>Signets</h2><ul class="bm">';
+    for (const bm of [...b.bookmarks].sort((x, y) => x.para - y.para)) {
+      const ch = chapterOf(bm.para);
+      body += `<li>${esc(bm.label)}${ch ? ` <span class="ch">— ${esc(ch)}</span>` : ''}</li>`;
+    }
+    body += '</ul>';
+  }
+  if (b.annotations.length) {
+    body += '<h2>Surlignages</h2>';
+    let lastCh = null;
+    for (const a of [...b.annotations].sort((x, y) => x.para - y.para || x.start - y.start)) {
+      const ch = chapterOf(a.para);
+      if (ch !== lastCh) { if (ch) body += `<h3>${esc(ch)}</h3>`; lastCh = ch; }
+      body += `<blockquote style="border-color:${HL[a.color] || '#1D1A14'}">${esc(a.text)}` +
+        (a.note ? `<span class="note">📝 ${esc(a.note)}</span>` : '') + '</blockquote>';
+    }
+  }
+  const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><style>
+    @page { margin: 18mm 16mm; }
+    * { box-sizing: border-box; }
+    body { font-family: Georgia, 'Times New Roman', serif; color: #1D1A14; line-height: 1.55; }
+    header { border-bottom: 3px solid #1D1A14; padding-bottom: 10px; margin-bottom: 18px; }
+    h1 { font-size: 24px; margin: 0; }
+    .sub { font-size: 12px; color: #8A8172; margin-top: 4px; }
+    h2 { font-size: 17px; margin: 22px 0 8px; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
+    h3 { font-size: 14px; margin: 16px 0 6px; color: #3E7BD9; }
+    blockquote { margin: 0 0 12px; padding: 6px 12px; border-left: 6px solid #1D1A14;
+      background: #FBF5E6; break-inside: avoid; }
+    .note { display: block; margin-top: 6px; font-style: italic; color: #555; }
+    ul.bm { padding-left: 18px; } ul.bm li { margin-bottom: 4px; }
+    .ch { color: #8A8172; font-style: italic; }
+  </style></head><body>
+    <header><h1>${esc(b.title)}</h1>
+      <div class="sub">Notes de lecture${b.author ? ` · ${esc(b.author)}` : ''} · exporté depuis Livre le ${new Date().toLocaleDateString('fr-FR')}</div>
+    </header>${body}</body></html>`;
+  const safe = b.title.replace(/[<>:"/\\|?*]/g, '').slice(0, 60);
+  const path = await window.livre.exportPdf({ defaultName: `Notes - ${safe}.pdf`, html });
   if (path) toast(`Exporté : ${basename(path)}`);
 }

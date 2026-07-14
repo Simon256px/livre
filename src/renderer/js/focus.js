@@ -57,6 +57,32 @@ function pomodoroStop() {
   $('#pomodoroBtn').classList.remove('on');
 }
 
+// Son de tournage de page : court souffle de bruit filtré
+function playPageSound() {
+  if (!store.settings.pageSound) return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const dur = 0.16;
+    const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * dur), ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) {
+      const t = i / d.length;
+      d[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, 2); // enveloppe décroissante
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = 2400;
+    bp.Q.value = 0.6;
+    const g = ctx.createGain();
+    g.gain.value = 0.22;
+    src.connect(bp); bp.connect(g); g.connect(ctx.destination);
+    src.start();
+    src.onended = () => ctx.close();
+  } catch { /* audio indisponible */ }
+}
+
 function pomodoroBeep() {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();

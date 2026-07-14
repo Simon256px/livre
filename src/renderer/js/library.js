@@ -181,6 +181,76 @@ function editTags(id) {
   renderLibrary();
 }
 
+/* ---------- Import / export de la bibliothèque ---------- */
+
+async function exportLibrary() {
+  const data = {
+    app: 'livre',
+    exportedAt: new Date().toISOString(),
+    version: store.version,
+    settings: store.settings,
+    stats: store.stats,
+    books: store.books,
+  };
+  const stamp = new Date().toISOString().slice(0, 10);
+  const path = await window.livre.exportFile({
+    defaultName: `Bibliotheque Livre - ${stamp}.json`,
+    content: JSON.stringify(data, null, 2),
+    kind: 'json',
+  });
+  if (path) toast(`Bibliothèque exportée : ${basename(path)}`);
+}
+
+async function importLibrary() {
+  const picked = await window.livre.importFile({ kind: 'json' });
+  if (!picked) return;
+  let data;
+  try {
+    data = JSON.parse(picked.content);
+  } catch {
+    alert("Fichier illisible : ce n'est pas un export de bibliothèque valide.");
+    return;
+  }
+  if (data.app !== 'livre' || !Array.isArray(data.books)) {
+    alert("Ce fichier n'est pas un export de bibliothèque Livre.");
+    return;
+  }
+  let added = 0, merged = 0;
+  for (const ib of data.books) {
+    const existing = store.books.find((b) => b.id === ib.id || b.path === ib.path);
+    if (existing) {
+      // fusion : on garde la lecture la plus avancée / la plus récente
+      existing.annotations = ib.annotations || existing.annotations;
+      existing.bookmarks = ib.bookmarks || existing.bookmarks;
+      existing.tags = [...new Set([...(existing.tags || []), ...(ib.tags || [])])];
+      existing.favorite = existing.favorite || ib.favorite;
+      if ((ib.lastOpenedAt || 0) > (existing.lastOpenedAt || 0)) {
+        existing.progress = ib.progress;
+        existing.anchor = ib.anchor;
+        existing.lastOpenedAt = ib.lastOpenedAt;
+      }
+      existing.readingSeconds = Math.max(existing.readingSeconds || 0, ib.readingSeconds || 0);
+      merged++;
+    } else {
+      store.books.push(ib);
+      added++;
+    }
+  }
+  // stats : on prend le max par jour (évite de doubler lors d'une restauration)
+  if (data.stats && data.stats.daily) {
+    for (const [day, d] of Object.entries(data.stats.daily)) {
+      const cur = store.stats.daily[day] || { seconds: 0, words: 0 };
+      store.stats.daily[day] = {
+        seconds: Math.max(cur.seconds, d.seconds || 0),
+        words: Math.max(cur.words, d.words || 0),
+      };
+    }
+  }
+  persist();
+  renderLibrary();
+  toast(`Import terminé : ${added} ajouté(s), ${merged} fusionné(s)`);
+}
+
 function setShelf(shelf) {
   libraryFilter.shelf = shelf;
   renderLibrary();

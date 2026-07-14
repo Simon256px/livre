@@ -28,6 +28,8 @@
       <div class="head-actions">
         <input type="search" id="libSearch" placeholder="Rechercher un livre…">
         <div class="theme-dots" id="libDots"></div>
+        <button class="pill icon" id="exportLibBtn" title="Exporter la bibliothèque (sauvegarde)">⭳</button>
+        <button class="pill icon" id="importLibBtn" title="Importer une bibliothèque">⭱</button>
         <button class="pill primary" id="addBtn">＋ Ajouter</button>
       </div>
     </header>
@@ -131,7 +133,11 @@
         <h2>🗒 Notes</h2>
         <button class="pill icon" id="notesCloseBtn">✕</button>
       </div>
-      <button class="pill" id="exportBtn">⇣ Exporter en Markdown</button>
+      <input type="search" id="notesSearch" placeholder="Rechercher dans les notes…">
+      <div class="export-row">
+        <button class="pill" id="exportBtn">⇣ Markdown</button>
+        <button class="pill" id="exportPdfBtn">⇣ PDF</button>
+      </div>
       <h3 class="drawer-sub">Signets</h3>
       <ul id="bookmarkList"></ul>
       <h3 class="drawer-sub">Surlignages</h3>
@@ -190,9 +196,19 @@
         <input type="range" id="widthRange" min="440" max="760" step="20">
       </div>
 
+      <div class="setting">
+        <label for="marginRange">Marges <span class="val" id="marginVal"></span></label>
+        <input type="range" id="marginRange" min="24" max="90" step="2">
+      </div>
+
       <div class="setting toggle-row">
         <label for="justifyChk">Texte justifié</label>
         <input type="checkbox" id="justifyChk">
+      </div>
+
+      <div class="setting toggle-row">
+        <label for="pageSoundChk">Son de tournage de page</label>
+        <input type="checkbox" id="pageSoundChk">
       </div>
 
       <hr class="rule dotted">

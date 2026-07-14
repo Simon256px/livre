@@ -193,6 +193,14 @@ function goTo(page, save = true) {
   tocHighlight();
 }
 
+// Navigation utilisateur (boutons, molette, flèches) : joue le son de page
+function turnPage(delta) {
+  if (!current) return;
+  const before = current.page;
+  goTo(current.page + delta);
+  if (store.settings.flow === 'pages' && current.page !== before) playPageSound();
+}
+
 // En mode défilement, les boutons/flèches font défiler d'un écran
 function scrollBy(page) {
   const vp = $('#bookViewport');

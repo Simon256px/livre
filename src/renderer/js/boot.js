@@ -15,6 +15,10 @@ function syncControls() {
   $('#lhVal').textContent = s.lineHeight.toFixed(2);
   $('#widthRange').value = s.pageWidth;
   $('#widthVal').textContent = s.pageWidth + ' px';
+  $('#marginRange').value = s.pageMargin;
+  $('#marginVal').textContent = s.pageMargin + ' px';
+  document.documentElement.style.setProperty('--page-margin', s.pageMargin + 'px');
+  $('#pageSoundChk').checked = s.pageSound;
   $('#justifyChk').checked = s.justify;
   $('#bionicChk').checked = s.bionic;
   $('#intensityRange').value = s.bionicIntensity;
@@ -87,6 +91,8 @@ function buildUI() {
     if (chip) setTagFilter(chip.dataset.tag);
   });
   $('#statGoal').addEventListener('click', editDailyGoal);
+  $('#exportLibBtn').addEventListener('click', exportLibrary);
+  $('#importLibBtn').addEventListener('click', importLibrary);
 
   /* --- Barre de lecture --- */
   $('#backBtn').addEventListener('click', closeReader);
@@ -94,6 +100,8 @@ function buildUI() {
   $('#searchBtn').addEventListener('click', openSearch);
   $('#bookmarkBtn').addEventListener('click', toggleBookmark);
   $('#notesBtn').addEventListener('click', () => {
+    notesQuery = '';
+    $('#notesSearch').value = '';
     renderNotesDrawer();
     toggleDrawer('#notesDrawer');
   });
@@ -110,8 +118,8 @@ function buildUI() {
   });
   $('#fullscreenBtn').addEventListener('click', toggleFullscreen);
   $('#settingsBtn').addEventListener('click', () => toggleDrawer('#settingsDrawer'));
-  $('#prevBtn').addEventListener('click', () => goTo(current.page - 1));
-  $('#nextBtn').addEventListener('click', () => goTo(current.page + 1));
+  $('#prevBtn').addEventListener('click', () => turnPage(-1));
+  $('#nextBtn').addEventListener('click', () => turnPage(1));
 
   /* --- Recherche plein texte --- */
   $('#searchInput').addEventListener('keydown', (e) => {
@@ -133,6 +141,11 @@ function buildUI() {
   $('#notesCloseBtn').addEventListener('click', () => $('#notesDrawer').classList.remove('open'));
   $('#closeDrawerBtn').addEventListener('click', () => $('#settingsDrawer').classList.remove('open'));
   $('#exportBtn').addEventListener('click', exportAnnotations);
+  $('#exportPdfBtn').addEventListener('click', exportAnnotationsPdf);
+  $('#notesSearch').addEventListener('input', debounce((e) => {
+    notesQuery = e.target.value;
+    renderNotesDrawer();
+  }, 150));
 
   /* --- Réglages --- */
   $('#fontSelect').addEventListener('change', (e) => {
@@ -158,6 +171,15 @@ function buildUI() {
   $('#widthRange').addEventListener('input', (e) => {
     store.settings.pageWidth = Number(e.target.value);
     applySettings(true);
+  });
+  $('#marginRange').addEventListener('input', (e) => {
+    store.settings.pageMargin = Number(e.target.value);
+    applySettings(true);
+  });
+  $('#pageSoundChk').addEventListener('change', (e) => {
+    store.settings.pageSound = e.target.checked;
+    applySettings(false);
+    if (e.target.checked) playPageSound();
   });
   $('#justifyChk').addEventListener('change', (e) => {
     store.settings.justify = e.target.checked;
@@ -274,10 +296,10 @@ function buildUI() {
     else if (e.key === 'F11') { e.preventDefault(); toggleFullscreen(); }
     else if (e.key === 'ArrowRight' || e.key === 'PageDown' || (e.key === ' ' && !e.shiftKey)) {
       e.preventDefault();
-      goTo(current.page + 1);
+      turnPage(1);
     } else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || (e.key === ' ' && e.shiftKey)) {
       e.preventDefault();
-      goTo(current.page - 1);
+      turnPage(-1);
     } else if (e.key === 'Escape') {
       if (dictVisible()) hideDictPopover();
       else if (!$('#hlToolbar').classList.contains('hidden')) hideHlToolbar();
@@ -296,7 +318,7 @@ function buildUI() {
     const now = Date.now();
     if (now - wheelLock < 180) return;
     wheelLock = now;
-    goTo(current.page + (e.deltaY > 0 ? 1 : -1));
+    turnPage(e.deltaY > 0 ? 1 : -1);
   }, { passive: true });
 
   $('#bookViewport').addEventListener('scroll', debounce(onScrolled, 150));

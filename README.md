@@ -29,11 +29,17 @@ Livre est une application de bureau (Electron) qui prend vos PDF et EPUB et les 
 
 ### Annotations
 - **Surlignage 4 couleurs** (sélectionner du texte → palette flottante), notes attachées, signets
-- **Export des annotations en Markdown**, regroupées par chapitre
+- **Recherche** dans les notes ; **export Markdown et PDF**, regroupés par chapitre
+
+### Personnalisation & accessibilité
+- 5 thèmes dont un **contraste élevé** (noir sur blanc, sans grain)
+- Marges réglables, **sons de tournage de page** (activables)
+- Police OpenDyslexic, navigation clavier
 
 ### Bibliothèque & statistiques
 - Couvertures extraites automatiquement, progression, recherche par titre/auteur/tag
 - **Étagères** automatiques (À lire / En cours / Terminés), **favoris** ★ et **tags** éditables
+- **Import/export de la bibliothèque** en JSON (sauvegarde et migration)
 - **Reprise exacte** de la lecture, ancrée au paragraphe (survit aux changements de mise en page)
 - **Objectif quotidien** (anneau de progression) et **minuteur Pomodoro** lecture/pause
 - **Stats quotidiennes** : temps de lecture, streak 🔥, vitesse moyenne, graphique 14 jours

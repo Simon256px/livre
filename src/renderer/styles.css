@@ -25,6 +25,7 @@ body[data-theme="creme"] { --bg:#F2EBDA; --paper:#FBF5E6; --ink:#1D1A14; --muted
 body[data-theme="sepia"] { --bg:#EADCBE; --paper:#F4E8CB; --ink:#41321C; --muted:#93805C; --dim:rgba(234,220,190,.8); --grain-op:.06; }
 body[data-theme="ambre"] { --bg:#211709; --paper:#2C1F0E; --ink:#EFCE95; --muted:#A9884F; --dim:rgba(33,23,9,.82);   --grain-op:.09; }
 body[data-theme="nuit"]  { --bg:#0D1320; --paper:#151D30; --ink:#E9E3D3; --muted:#8B92A8; --dim:rgba(13,19,32,.82);  --grain-op:.09; }
+body[data-theme="contraste"] { --bg:#FFFFFF; --paper:#FFFFFF; --ink:#000000; --muted:#333333; --dim:rgba(255,255,255,.85); --grain-op:0; }
 
 html, body { margin: 0; height: 100%; }
 
@@ -102,6 +103,7 @@ body {
 .dot[data-theme="sepia"] { background: #E3CFA3; }
 .dot[data-theme="ambre"] { background: #43300F; }
 .dot[data-theme="nuit"]  { background: #0D1320; }
+.dot[data-theme="contraste"] { background: #fff; background-image: linear-gradient(135deg, #fff 50%, #000 50%); }
 
 /* ─────────── Bibliothèque ─────────── */
 .screen { height: 100vh; }
@@ -506,7 +508,7 @@ body.fullscreen.peek .topbar { transform: translateY(0); opacity: 1; }
   background: var(--paper);
   border: 2px solid var(--ink);
   border-radius: 20px;
-  padding: 16px 46px 12px;
+  padding: 16px var(--page-margin, 46px) 12px;
   box-shadow: 6px 6px 0 var(--ink), inset 26px 0 34px -30px rgba(0,0,0,.3);
 }
 
@@ -640,6 +642,23 @@ body.fullscreen.peek .topbar { transform: translateY(0); opacity: 1; }
   color: var(--muted);
   margin: 24px 0 10px;
 }
+
+#notesSearch {
+  width: 100%;
+  height: 36px;
+  padding: 0 14px;
+  margin-bottom: 12px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  outline: none;
+}
+#notesSearch::placeholder { color: var(--muted); }
+.export-row { display: flex; gap: 8px; margin-bottom: 6px; }
+.export-row .pill { flex: 1; }
 
 /* Sommaire */
 #tocList { list-style: none; margin: 0; padding: 0; }

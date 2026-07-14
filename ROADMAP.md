@@ -15,8 +15,11 @@ Les cases cochées sont déjà dans la version actuelle.
 - ~~v0.4 — RSVP visuel, TTS retiré, installeur Windows~~ ✅ livré
 - ~~v0.5 — OCR des PDF scannés (Tesseract embarqué)~~ ✅ livré
 - ~~v0.6 — Confort : objectif quotidien, Pomodoro, favoris/tags/étagères~~ ✅ livré
-- **v0.7 — Écosystème** : import/export de la bibliothèque, thèmes
-  personnalisés, import de polices
+- ~~v0.7 — Export PDF, recherche notes, import/export biblio, contraste, marges, sons~~ ✅ livré
+- **v0.8 — Personnalisation** : thèmes et couleurs sur mesure, import de polices,
+  animation de page tournée
+- **Plus tard** : traduction/Wikipédia (opt-in), fonctions IA (opt-in),
+  voix neurales locales, sync automatique multi-appareils
 
 ## 📚 Lecture
 
@@ -40,8 +43,9 @@ Les cases cochées sont déjà dans la version actuelle.
 - [x] Signets (bookmarks)
 - [ ] Dessin au stylet
 - [x] Export des annotations en Markdown
-- [ ] Export des annotations en PDF
-- [ ] Synchronisation des annotations entre appareils
+- [x] Export des annotations en PDF (PDF de notes mis en page)
+- [ ] Synchronisation automatique des annotations entre appareils
+      (l'import/export de bibliothèque permet déjà un transfert manuel)
 
 ## 🧠 Aides à la lecture
 
@@ -85,24 +89,24 @@ Les cases cochées sont déjà dans la version actuelle.
 - [ ] Import de polices personnalisées
 - [ ] Création de thèmes
 - [ ] Couleurs personnalisables
-- [ ] Marges et colonnes réglables
-- [ ] Animation de changement de page
-- [ ] Sons de page
+- [x] Marges et colonnes réglables (marges + simple/double page/défilement)
+- [ ] Animation de changement de page (page tournée / courbée)
+- [x] Sons de page (souffle de tournage, activable)
 
 ## ☁️ Synchronisation
 
 - [x] Reprise fiable de la position (sauvegarde immédiate à la fermeture, bouton « Reprendre »)
+- [x] Import/export de la bibliothèque (JSON : livres, annotations, tags, stats — sauvegarde/migration)
 - [ ] Sauvegarde dans le cloud (opt-in)
-- [ ] Synchronisation entre PC, Mac et Linux
+- [ ] Synchronisation automatique entre PC, Mac et Linux
 - [ ] Historique des versions des annotations
-- [ ] Import/export de la bibliothèque
 
 ## 🔎 Recherche
 
 - [x] Livres récemment ouverts (tri par dernière ouverture)
 - [x] Recherche plein texte dans le livre (Ctrl+F, insensible aux accents)
 - [x] Recherche dans la bibliothèque (titre, auteur et tags)
-- [ ] Recherche dans les annotations
+- [x] Recherche dans les annotations (champ dans le panneau Notes)
 - [x] Recherche par tags (puces de filtrage + étagères)
 - [ ] Filtres intelligents
 
@@ -122,7 +126,7 @@ Les cases cochées sont déjà dans la version actuelle.
       françaises étaient trop robotiques ; à reconsidérer avec des voix
       neurales locales (type Piper)
 - [ ] Compatibilité avec les lecteurs d'écran
-- [ ] Contraste élevé
+- [x] Contraste élevé (thème dédié, sans grain, noir sur blanc)
 - [x] Police OpenDyslexic
 - [ ] Contrôle vocal
 - [x] Navigation au clavier dans le lecteur

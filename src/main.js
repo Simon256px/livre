@@ -125,15 +125,68 @@ ipcMain.handle('delete-cache', async (_e, id) => {
   return true;
 });
 
-ipcMain.handle('export-file', async (_e, { defaultName, content }) => {
-  const r = await dialog.showSaveDialog(win, {
-    title: 'Exporter',
-    defaultPath: defaultName,
-    filters: [{ name: 'Markdown', extensions: ['md'] }],
-  });
-  if (r.canceled || !r.filePath) return null;
-  await fs.writeFile(r.filePath, content, 'utf8');
-  return r.filePath;
+const FILTERS = {
+  md: [{ name: 'Markdown', extensions: ['md'] }],
+  json: [{ name: 'Bibliothèque Livre (JSON)', extensions: ['json'] }],
+};
+
+// Tests : écrit dans LIVRE_TEST_EXPORT_DIR sans dialogue
+async function testExportPath(defaultName) {
+  if (!process.env.LIVRE_TEST_EXPORT_DIR) return undefined;
+  await fs.mkdir(process.env.LIVRE_TEST_EXPORT_DIR, { recursive: true });
+  return path.join(process.env.LIVRE_TEST_EXPORT_DIR, defaultName);
+}
+
+ipcMain.handle('export-file', async (_e, { defaultName, content, kind = 'md' }) => {
+  let filePath = await testExportPath(defaultName);
+  if (!filePath) {
+    const r = await dialog.showSaveDialog(win, {
+      title: 'Exporter',
+      defaultPath: defaultName,
+      filters: FILTERS[kind] || FILTERS.md,
+    });
+    if (r.canceled || !r.filePath) return null;
+    filePath = r.filePath;
+  }
+  await fs.writeFile(filePath, content, 'utf8');
+  return filePath;
+});
+
+ipcMain.handle('import-file', async (_e, { kind = 'json' } = {}) => {
+  let filePath = process.env.LIVRE_TEST_IMPORT_FILE;
+  if (!filePath) {
+    const r = await dialog.showOpenDialog(win, {
+      title: 'Importer',
+      filters: FILTERS[kind] || FILTERS.json,
+      properties: ['openFile'],
+    });
+    if (r.canceled || !r.filePaths[0]) return null;
+    filePath = r.filePaths[0];
+  }
+  return { path: filePath, content: await fs.readFile(filePath, 'utf8') };
+});
+
+// Export d'un PDF de notes : rendu HTML → printToPDF dans une fenêtre cachée
+ipcMain.handle('export-pdf', async (_e, { defaultName, html }) => {
+  let filePath = await testExportPath(defaultName);
+  if (!filePath) {
+    const r = await dialog.showSaveDialog(win, {
+      title: 'Exporter en PDF',
+      defaultPath: defaultName,
+      filters: [{ name: 'PDF', extensions: ['pdf'] }],
+    });
+    if (r.canceled || !r.filePath) return null;
+    filePath = r.filePath;
+  }
+  const w = new BrowserWindow({ show: false, webPreferences: { sandbox: true } });
+  try {
+    await w.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html));
+    const pdf = await w.webContents.printToPDF({ printBackground: true, pageSize: 'A4' });
+    await fs.writeFile(filePath, pdf);
+  } finally {
+    w.destroy();
+  }
+  return filePath;
 });
 
 ipcMain.handle('toggle-fullscreen', () => {

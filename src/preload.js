@@ -9,6 +9,8 @@ contextBridge.exposeInMainWorld('livre', {
   saveCache: (id, data) => ipcRenderer.invoke('save-cache', id, data),
   deleteCache: (id) => ipcRenderer.invoke('delete-cache', id),
   exportFile: (opts) => ipcRenderer.invoke('export-file', opts),
+  importFile: (opts) => ipcRenderer.invoke('import-file', opts),
+  exportPdf: (opts) => ipcRenderer.invoke('export-pdf', opts),
   toggleFullscreen: () => ipcRenderer.invoke('toggle-fullscreen'),
   openExternal: (url) => ipcRenderer.invoke('open-external', url),
   onFullscreen: (cb) => ipcRenderer.on('fullscreen', (_e, on) => cb(on)),
