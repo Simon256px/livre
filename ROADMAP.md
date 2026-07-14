@@ -13,7 +13,7 @@ Les cases cochées sont déjà dans la version actuelle.
 - ~~v0.2.1 — Chargement interruptible, RSVP libre~~ ✅ livré
 - ~~v0.3 — Dictionnaire (Wiktionnaire), reprise fiable~~ ✅ livré
 - ~~v0.4 — RSVP visuel, TTS retiré, installeur Windows~~ ✅ livré
-- **v0.5 — OCR** : PDF scannés via Tesseract embarqué
+- ~~v0.5 — OCR des PDF scannés (Tesseract embarqué)~~ ✅ livré
 - **v0.6 — Confort** : objectifs quotidiens, Pomodoro, collections et tags
 - **v0.7 — Écosystème** : import/export de la bibliothèque, thèmes
   personnalisés, import de polices
@@ -23,7 +23,7 @@ Les cases cochées sont déjà dans la version actuelle.
 - [x] Reflow du texte PDF (paragraphes recollés, en-têtes/pieds supprimés)
 - [x] Pagination façon livre
 - [x] EPUB avec le même moteur de reflow
-- [ ] OCR pour les PDF scannés
+- [x] OCR pour les PDF scannés (Tesseract WASM, modèles fra+eng embarqués, 100 % offline)
 - [x] Affichage des images et graphiques
 - [x] Double page (comme un livre ouvert) — auto selon la fenêtre, ou forcée
 - [x] Défilement continu en plus de la pagination

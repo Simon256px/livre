@@ -327,17 +327,27 @@ async function getContent(book) {
   const buf = await window.livre.readFile(book.path);
   throwIfCancelled();
   let result;
+  let skipCache = false;
   if (book.format === 'epub') {
     result = await extractEpub(buf, (i, n) => setProgress(i, n, 'Extraction du texte'));
   } else {
     const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buf), ...PDF_OPTS }).promise;
     try {
       result = await extractPdf(pdf, (i, n) => setProgress(i, n, 'Extraction du texte'));
+      // PDF quasi sans texte → probablement un scan : proposer l'OCR
+      if (result.words < 30 && ocrAvailable()) {
+        const go = window.LIVRE_OCR_AUTO || confirm(
+          'Ce PDF semble être un scan (peu ou pas de texte sélectionnable).\n\n' +
+          `Lancer la reconnaissance de texte (OCR) sur ${pdf.numPages} page(s) ?\n` +
+          'Cela fonctionne hors ligne et peut prendre un moment.');
+        if (go) result = await ocrPdf(pdf);
+        else skipCache = true; // pas de cache : reproposer l'OCR à la prochaine ouverture
+      }
     } finally {
       pdf.destroy();
     }
   }
-  const data = { v: CACHE_V, paras: result.paras, words: result.words };
-  window.livre.saveCache(book.id, data);
+  const data = { v: CACHE_V, paras: result.paras, words: result.words, ocr: !!result.ocr };
+  if (!skipCache) window.livre.saveCache(book.id, data);
   return data;
 }

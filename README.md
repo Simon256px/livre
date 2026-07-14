@@ -11,6 +11,7 @@ Livre est une application de bureau (Electron) qui prend vos PDF et EPUB et les 
 ### Lecture
 - **Reflow intelligent** : extraction du texte (pdf.js), suppression des en-têtes/pieds de page répétés, paragraphes et césures recollés, chapitres détectés
 - **PDF et EPUB** avec le même moteur de rendu, images incluses
+- **OCR des PDF scannés** : reconnaissance de texte hors ligne (Tesseract WASM, modèles français + anglais embarqués), proposée automatiquement quand un PDF n'a pas de texte
 - **Pagination façon livre** : simple ou double page (auto selon la fenêtre), ou défilement continu
 - **Sommaire interactif**, recherche plein texte (Ctrl+F, insensible aux accents), plein écran immersif (F11)
 - **4 modes lumière** : crème, sépia, ambre (sans lumière bleue), nuit — avec grain papier

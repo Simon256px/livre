@@ -36,7 +36,7 @@ const PDF_OPTS = {
 };
 
 const GAP = 64; // espace entre deux colonnes-pages
-const CACHE_V = 3; // à incrémenter quand la logique d'extraction change
+const CACHE_V = 4; // à incrémenter quand la logique d'extraction change
 const THEMES = ['creme', 'sepia', 'ambre', 'nuit'];
 const ACCENTS = ['var(--yellow)', 'var(--blue)', 'var(--green)', 'var(--red)', 'var(--pink)', 'var(--purple)'];
 const HL_COLORS = ['yellow', 'green', 'blue', 'pink'];

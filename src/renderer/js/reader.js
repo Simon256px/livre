@@ -9,9 +9,9 @@ async function openBook(id) {
   showLoader('Lecture du fichier…', { progress: true, cancelable: true });
   try {
     const { paras, words } = await getContent(book);
-    if (!paras.length || words < 40) {
+    if (!paras.length || words < 8) {
       hideLoader();
-      alert("Ce livre ne contient pas de texte extractible — sans doute un scan.\nL'OCR arrivera dans une prochaine version !");
+      alert("Aucun texte à afficher pour ce livre.\nS'il s'agit d'un scan, rouvre-le pour lancer la reconnaissance de texte (OCR).");
       return;
     }
     book.words = words;
