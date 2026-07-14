@@ -19,8 +19,13 @@ Livre est une application de bureau (Electron) qui prend vos PDF et EPUB et les 
 ### Vitesse & confort
 - **Bionic reading** à intensité réglable
 - **Mode focus** : règle de lecture qui suit la souris
-- **Mode RSVP** : lecture rapide mot à mot avec point de fixation, 150–700 mots/min
+- **Mode RSVP** : lecture rapide mot à mot avec point de fixation, 150–700 mots/min, reprise libre à n'importe quel mot et progression visible
+- **Dictionnaire** au double-clic sur un mot (Wiktionnaire — en ligne, opt-in)
 - **Lecture vocale** (voix système) avec suivi visuel du paragraphe
+
+### Fichiers lourds
+- **Chargement interruptible** : barre de progression et bouton pour annuler un gros PDF/EPUB
+- **Reprise fiable** : la position est sauvegardée à la fermeture et un bouton « Reprendre » ramène exactement où tu t'étais arrêté
 
 ### Annotations
 - **Surlignage 4 couleurs** (sélectionner du texte → palette flottante), notes attachées, signets
@@ -49,9 +54,10 @@ npx electron . chemin/vers/livre.pdf
 | Touche | Action |
 |---|---|
 | `←` `→` / espace / molette | tourner les pages |
+| double-clic sur un mot | définition (dictionnaire) |
 | `Ctrl+F` | rechercher dans le livre |
 | `F11` | plein écran |
-| `Échap` | fermer (recherche → panneaux → lecteur) |
+| `Échap` | fermer (dictionnaire → recherche → panneaux → lecteur) |
 
 ## 🛠️ Stack technique
 

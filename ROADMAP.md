@@ -9,12 +9,12 @@ Les cases cochées sont déjà dans la version actuelle.
 
 ## 🚀 Prochaines étapes proposées
 
-- ~~v0.2 — Lire confortablement~~ ✅ livré
-- ~~v0.3 — Annoter~~ ✅ livré (fusionné dans la v0.2)
-- **v0.3 — OCR** : PDF scannés via Tesseract embarqué
-- **v0.4 — Confort** : dictionnaire offline, objectifs quotidiens, Pomodoro,
-  collections et tags
-- **v0.5 — Écosystème** : import/export de la bibliothèque, thèmes
+- ~~v0.2 — Lire confortablement + annoter~~ ✅ livré
+- ~~v0.2.1 — Chargement interruptible, RSVP libre~~ ✅ livré
+- ~~v0.3 — Dictionnaire (Wiktionnaire), reprise fiable~~ ✅ livré
+- **v0.4 — OCR** : PDF scannés via Tesseract embarqué
+- **v0.5 — Confort** : objectifs quotidiens, Pomodoro, collections et tags
+- **v0.6 — Écosystème** : import/export de la bibliothèque, thèmes
   personnalisés, import de polices
 
 ## 📚 Lecture
@@ -44,7 +44,7 @@ Les cases cochées sont déjà dans la version actuelle.
 
 ## 🧠 Aides à la lecture
 
-- [ ] Dictionnaire intégré (double-clic sur un mot)
+- [x] Dictionnaire intégré (double-clic sur un mot, Wiktionnaire — en ligne, opt-in)
 - [ ] Traduction instantanée
 - [ ] Définition Wikipédia
 - [ ] Prononciation d'un mot
@@ -89,9 +89,9 @@ Les cases cochées sont déjà dans la version actuelle.
 
 ## ☁️ Synchronisation
 
+- [x] Reprise fiable de la position (sauvegarde immédiate à la fermeture, bouton « Reprendre »)
 - [ ] Sauvegarde dans le cloud (opt-in)
 - [ ] Synchronisation entre PC, Mac et Linux
-- [ ] Sauvegarde automatique
 - [ ] Historique des versions des annotations
 - [ ] Import/export de la bibliothèque
 

@@ -104,11 +104,16 @@ function renderLibrary() {
       ? `<img src="${b.cover}" alt="">`
       : `<span class="letter">${esc((b.title[0] || '?').toUpperCase())}</span>`;
     const unit = b.format === 'epub' ? 'sections' : 'pages';
+    const started = b.progress > 0 && b.progress < 1;
+    const resume = started ? `<button class="resume" title="Reprendre la lecture">▶</button>` : '';
+    const meta = started
+      ? `${b.pages} ${unit} · reprendre à ${pct} %`
+      : `${b.pages} ${unit} · ${fmtTime(b.readingSeconds)}${pct >= 100 ? ' · terminé ✦' : ''}`;
     return `<article class="book-card" data-id="${b.id}">
-      <div class="cover" style="background:${b.cover ? 'var(--bg)' : accent}">${cover}<span class="format">${b.format}</span></div>
+      <div class="cover" style="background:${b.cover ? 'var(--bg)' : accent}">${cover}${resume}<span class="format">${b.format}</span></div>
       <button class="del" title="Retirer de la bibliothèque">✕</button>
       <h3>${esc(b.title)}</h3>
-      <p class="meta">${b.pages} ${unit} · ${fmtTime(b.readingSeconds)}${pct ? ` · ${pct} %` : ''}</p>
+      <p class="meta">${meta}</p>
       <div class="progress"><div class="fill" style="width:${pct}%"></div></div>
     </article>`;
   }).join('');
@@ -118,6 +123,11 @@ function renderLibrary() {
     $('.del', card).addEventListener('click', (e) => {
       e.stopPropagation();
       removeBook(card.dataset.id);
+    });
+    const resumeBtn = $('.resume', card);
+    if (resumeBtn) resumeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openBook(card.dataset.id);
     });
   });
 }

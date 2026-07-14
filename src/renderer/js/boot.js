@@ -22,6 +22,7 @@ function syncControls() {
   $('#focusChk').checked = s.focus;
   $('#ttsRate').value = s.ttsRate;
   $('#ttsRateVal').textContent = s.ttsRate.toFixed(2) + '×';
+  $('#dictChk').checked = s.dictOnline;
   $('#bionicBtn').classList.toggle('on', s.bionic);
   $('#focusBtn').classList.toggle('on', s.focus);
   updateFocusRuler();
@@ -170,6 +171,10 @@ function buildUI() {
     store.settings.ttsRate = Number(e.target.value);
     applySettings(false);
   });
+  $('#dictChk').addEventListener('change', (e) => {
+    store.settings.dictOnline = e.target.checked;
+    persist();
+  });
 
   /* --- Surlignage --- */
   document.addEventListener('mouseup', (e) => {
@@ -192,9 +197,19 @@ function buildUI() {
       showAnnPopover(mark.dataset.ann, e.clientX, e.clientY);
     }
   });
+  // Double-clic sur un mot → dictionnaire
+  $('#bookContent').addEventListener('dblclick', (e) => {
+    const sel = getSelection();
+    const word = sel && !sel.isCollapsed ? sel.toString().trim() : '';
+    if (word && !/\s/.test(word)) {
+      hideHlToolbar();
+      lookupWord(word, e.clientX, e.clientY);
+    }
+  });
   document.addEventListener('mousedown', (e) => {
     if (!e.target.closest('#annPopover') && !e.target.closest('mark.hl')) hideAnnPopover();
     if (!e.target.closest('#hlToolbar') && !e.target.closest('#bookContent')) hideHlToolbar();
+    if (!e.target.closest('#dictPopover') && !e.target.closest('#bookContent')) hideDictPopover();
   });
 
   /* --- RSVP --- */
@@ -244,7 +259,8 @@ function buildUI() {
       e.preventDefault();
       goTo(current.page - 1);
     } else if (e.key === 'Escape') {
-      if (!$('#hlToolbar').classList.contains('hidden')) hideHlToolbar();
+      if (dictVisible()) hideDictPopover();
+      else if (!$('#hlToolbar').classList.contains('hidden')) hideHlToolbar();
       else if (!$('#searchBar').classList.contains('hidden')) closeSearch();
       else if ($$('.drawer.open').length) {
         $$('.drawer.open').forEach((d) => d.classList.remove('open'));
@@ -297,6 +313,10 @@ function buildUI() {
       .filter(Boolean);
     if (paths.length) addBooks(paths);
   });
+
+  // Sauvegarde immédiate à la fermeture : la position de lecture est
+  // toujours préservée, même sans attendre le debounce.
+  window.addEventListener('beforeunload', flushStore);
 
   /* --- Événements du processus principal --- */
   window.livre.onFullscreen(onFullscreenChanged);

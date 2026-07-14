@@ -214,6 +214,14 @@
         <label for="ttsRate">Vitesse de la voix <span class="val" id="ttsRateVal"></span></label>
         <input type="range" id="ttsRate" min="0.7" max="1.6" step="0.05">
       </div>
+
+      <hr class="rule dotted">
+
+      <div class="setting toggle-row">
+        <label for="dictChk">Dictionnaire en ligne</label>
+        <input type="checkbox" id="dictChk">
+      </div>
+      <p class="setting-note">Double-clique un mot pour sa définition (Wiktionnaire, connexion requise).</p>
     </aside>
   </section>
 
@@ -224,6 +232,9 @@
     <button class="hl-dot" data-color="blue" title="Surligner en bleu"></button>
     <button class="hl-dot" data-color="pink" title="Surligner en rose"></button>
   </div>
+
+  <!-- Popover du dictionnaire -->
+  <div id="dictPopover" class="hidden"></div>
 
   <!-- Popover d'édition d'un surlignage -->
   <div id="annPopover" class="hidden">
@@ -276,6 +287,7 @@
   <script src="js/extract.js"></script>
   <script src="js/reader.js"></script>
   <script src="js/annotations.js"></script>
+  <script src="js/dictionary.js"></script>
   <script src="js/media.js"></script>
   <script src="js/library.js"></script>
   <script src="js/boot.js"></script>

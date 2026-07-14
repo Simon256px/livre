@@ -23,11 +23,18 @@ async function openBook(id) {
     $('#runningHead').textContent = book.author ? `${book.title} — ${book.author}` : book.title;
     await document.fonts.ready;
     switchScreen('reader');
+    const resuming = book.progress > 0 && book.progress < 1;
     renderContent();
     paginate();
     restorePosition();
     buildToc();
     startTimer();
+    if (resuming) {
+      const where = store.settings.flow === 'scroll'
+        ? `${Math.round(book.progress * 100)} %`
+        : `la page ${current.page + 1}`;
+      toast(`Repris à ${where}`);
+    }
     console.log(`[livre] ouvert : ${book.title} — ${paras.length} blocs, ${words} mots`);
   } catch (e) {
     if (e instanceof CancelledError) {
@@ -50,6 +57,8 @@ function closeReader() {
   $$('.drawer').forEach((d) => d.classList.remove('open'));
   hideHlToolbar();
   hideAnnPopover();
+  hideDictPopover();
+  flushStore();
   switchScreen('library');
   renderLibrary();
 }

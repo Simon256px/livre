@@ -41,6 +41,7 @@ function selectionRanges() {
 
 function onTextSelected() {
   if (!current || !readerVisible()) return;
+  if (dictVisible()) return; // double-clic → dictionnaire, pas surlignage
   const sel = getSelection();
   if (!sel.rangeCount || sel.isCollapsed) { hideHlToolbar(); return; }
   if (!selectionRanges()) { hideHlToolbar(); return; }

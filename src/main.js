@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs/promises');
 
@@ -139,6 +139,18 @@ ipcMain.handle('export-file', async (_e, { defaultName, content }) => {
 ipcMain.handle('toggle-fullscreen', () => {
   win.setFullScreen(!win.isFullScreen());
   return win.isFullScreen();
+});
+
+// Ouverture d'un lien externe (dictionnaire) : restreint au Wiktionnaire fr
+ipcMain.handle('open-external', (_e, url) => {
+  try {
+    const u = new URL(url);
+    if (u.protocol === 'https:' && u.hostname === 'fr.wiktionary.org') {
+      shell.openExternal(url);
+      return true;
+    }
+  } catch {}
+  return false;
 });
 
 app.whenReady().then(createWindow);

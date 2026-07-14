@@ -64,6 +64,7 @@ const DEFAULT_SETTINGS = {
   ttsVoice: '',
   ttsRate: 1,
   rsvpWpm: 350,
+  dictOnline: false, // dictionnaire Wiktionnaire (requête réseau) — opt-in
 };
 
 let store = { version: 2, settings: { ...DEFAULT_SETTINGS }, books: [], stats: { daily: {} } };
@@ -73,6 +74,11 @@ let timerId = null;
 let searchState = { active: false, q: '', results: [], idx: 0 };
 
 const persist = debounce(() => window.livre.saveStore(store), 500);
+// Écriture immédiate (fermeture de fenêtre, sortie du lecteur) : garantit
+// que la position de lecture n'est jamais perdue.
+function flushStore() {
+  try { window.livre.saveStore(store); } catch {}
+}
 
 function todayKey(offset = 0) {
   const d = new Date();
