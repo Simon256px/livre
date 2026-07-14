@@ -104,9 +104,27 @@ function switchScreen(name) {
   $('#readerScreen').classList.toggle('hidden', name !== 'reader');
   updateFocusRuler();
 }
-function showLoader(text) {
+// Interruption d'un chargement long : levée depuis les boucles
+// d'extraction quand l'utilisateur clique sur « Interrompre »
+let loadCancelled = false;
+class CancelledError extends Error {
+  constructor() { super('chargement interrompu'); this.name = 'CancelledError'; }
+}
+function throwIfCancelled() {
+  if (loadCancelled) throw new CancelledError();
+}
+
+function showLoader(text, { progress = false, cancelable = false } = {}) {
   $('#loaderText').textContent = text;
+  $('#loaderBar').classList.toggle('hidden', !progress);
+  $('#loaderCancel').classList.toggle('hidden', !cancelable);
+  if (progress) $('#loaderFill').style.width = '0%';
   $('#loader').classList.remove('hidden');
+}
+function setProgress(done, total, text) {
+  const pct = total > 0 ? Math.min(100, Math.round((done / total) * 100)) : 0;
+  $('#loaderFill').style.width = pct + '%';
+  if (text) $('#loaderText').textContent = `${text} · ${pct} %`;
 }
 function hideLoader() {
   $('#loader').classList.add('hidden');

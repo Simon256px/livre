@@ -1,7 +1,7 @@
 {
   "name": "livre",
   "productName": "Livre",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Un lecteur qui transforme vos PDF en véritable expérience de lecture — texture papier, typographie soignée, bionic reading.",
   "author": "Simon Courtois <simoncrts@protonmail.com>",
   "license": "MIT",

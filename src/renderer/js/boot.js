@@ -57,6 +57,13 @@ function buildUI() {
     applySettings(false);
   }));
 
+  /* --- Chargement interruptible --- */
+  $('#loaderCancel').addEventListener('click', () => {
+    loadCancelled = true;
+    $('#loaderText').textContent = 'Interruption…';
+    $('#loaderCancel').classList.add('hidden');
+  });
+
   /* --- Bibliothèque --- */
   const pick = async () => {
     const paths = await window.livre.pickBooks();
@@ -193,16 +200,29 @@ function buildUI() {
   /* --- RSVP --- */
   $('#rsvpClose').addEventListener('click', rsvpClose);
   $('#rsvpPlay').addEventListener('click', () => rsvpSetPlaying(!rsvp.playing));
+  $('#rsvpBack').addEventListener('click', () => rsvpStep(-1));
+  $('#rsvpFwd').addEventListener('click', () => rsvpStep(1));
   $('#rsvpWpm').addEventListener('input', (e) => {
     store.settings.rsvpWpm = Number(e.target.value);
     $('#rsvpWpmVal').textContent = store.settings.rsvpWpm + ' mots/min';
     persist();
+  });
+  const seekFromEvent = (e) => {
+    const r = $('#rsvpBar').getBoundingClientRect();
+    rsvpSeek(Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)));
+  };
+  $('#rsvpBar').addEventListener('click', seekFromEvent);
+  $('#rsvpContext').addEventListener('click', (e) => {
+    const w = e.target.closest('.w');
+    if (w) rsvpGoto(Number(w.dataset.i));
   });
 
   /* --- Clavier --- */
   document.addEventListener('keydown', (e) => {
     if (rsvpVisible()) {
       if (e.key === ' ') { e.preventDefault(); rsvpSetPlaying(!rsvp.playing); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); rsvpStep(1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); rsvpStep(-1); }
       else if (e.key === 'Escape') rsvpClose();
       return;
     }

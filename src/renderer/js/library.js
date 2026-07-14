@@ -7,13 +7,16 @@ let libraryQuery = '';
 // Renvoie les ids des livres correspondant aux chemins (ajoutés ou déjà présents)
 async function addBooks(paths) {
   const ids = [];
+  loadCancelled = false;
   for (const p of paths) {
     const existing = store.books.find((b) => b.path === p);
     if (existing) { ids.push(existing.id); continue; }
-    showLoader(`Ouverture de ${basename(p)}…`);
+    showLoader(`Ouverture de ${basename(p)}…`, { cancelable: true });
     try {
+      throwIfCancelled();
       const format = /\.epub$/i.test(p) ? 'epub' : 'pdf';
       const buf = await window.livre.readFile(p);
+      throwIfCancelled();
       let title = basename(p).replace(/\.(pdf|epub)$/i, '');
       let author = '';
       let cover = null;
@@ -54,6 +57,7 @@ async function addBooks(paths) {
         lastOpenedAt: 0,
       });
     } catch (e) {
+      if (e instanceof CancelledError) { toast('Ajout interrompu'); break; }
       console.error(e);
       alert(`Impossible d'ouvrir « ${basename(p)} » : ${e.message || e}`);
     }

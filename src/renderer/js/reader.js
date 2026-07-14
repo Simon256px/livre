@@ -5,7 +5,8 @@
 async function openBook(id) {
   const book = store.books.find((b) => b.id === id);
   if (!book) return;
-  showLoader('Lecture du fichier…');
+  loadCancelled = false;
+  showLoader('Lecture du fichier…', { progress: true, cancelable: true });
   try {
     const { paras, words } = await getContent(book);
     if (!paras.length || words < 40) {
@@ -29,9 +30,14 @@ async function openBook(id) {
     startTimer();
     console.log(`[livre] ouvert : ${book.title} — ${paras.length} blocs, ${words} mots`);
   } catch (e) {
-    console.error(e);
-    alert(`Impossible de lire ce livre : ${e.message || e}`);
-    switchScreen('library');
+    if (e instanceof CancelledError) {
+      switchScreen('library');
+      toast('Chargement interrompu');
+    } else {
+      console.error(e);
+      alert(`Impossible de lire ce livre : ${e.message || e}`);
+      switchScreen('library');
+    }
   }
   hideLoader();
 }

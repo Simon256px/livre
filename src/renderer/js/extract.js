@@ -16,6 +16,7 @@ async function extractPdf(pdf, onProgress) {
   const pages = [];
   let figCount = 0;
   for (let i = 1; i <= pdf.numPages; i++) {
+    throwIfCancelled();
     const page = await pdf.getPage(i);
     const tc = await page.getTextContent();
     const lines = [];
@@ -291,6 +292,7 @@ async function extractEpub(buf, onProgress) {
   const paras = [];
   let figCount = 0;
   for (let s = 0; s < spine.length; s++) {
+    throwIfCancelled();
     const filePath = epubResolve(opfDir, spine[s].href);
     const f = zipEntry(zip, filePath);
     if (!f) continue;
@@ -323,15 +325,17 @@ async function getContent(book) {
   if (cached && cached.v === CACHE_V && Array.isArray(cached.paras)) return cached;
 
   const buf = await window.livre.readFile(book.path);
+  throwIfCancelled();
   let result;
   if (book.format === 'epub') {
-    result = await extractEpub(buf, (i, n) =>
-      showLoader(`Extraction du texte — section ${i} / ${n}`));
+    result = await extractEpub(buf, (i, n) => setProgress(i, n, 'Extraction du texte'));
   } else {
     const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buf), ...PDF_OPTS }).promise;
-    result = await extractPdf(pdf, (i, n) =>
-      showLoader(`Extraction du texte — page ${i} / ${n}`));
-    pdf.destroy();
+    try {
+      result = await extractPdf(pdf, (i, n) => setProgress(i, n, 'Extraction du texte'));
+    } finally {
+      pdf.destroy();
+    }
   }
   const data = { v: CACHE_V, paras: result.paras, words: result.words };
   window.livre.saveCache(book.id, data);

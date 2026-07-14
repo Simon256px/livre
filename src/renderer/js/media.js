@@ -89,9 +89,10 @@ const rsvp = { words: [], idx: 0, playing: false, timer: null };
 function rsvpOpen() {
   if (!current) return;
   ttsStop();
+  // Le flux complet du livre est indexé pour pouvoir revenir en
+  // arrière ; on démarre au paragraphe de lecture courant.
   rsvp.words = [];
-  const from = firstTextPara(current.book.anchor ?? 0);
-  for (let i = Math.max(0, from); i < current.paras.length; i++) {
+  for (let i = 0; i < current.paras.length; i++) {
     const p = current.paras[i];
     if (p.type === 'img') continue;
     for (const w of p.text.split(/\s+/)) {
@@ -99,25 +100,63 @@ function rsvpOpen() {
     }
   }
   if (!rsvp.words.length) { toast('Rien à lire ici'); return; }
-  rsvp.idx = 0;
+  const startPara = firstTextPara(current.book.anchor ?? 0);
+  rsvp.idx = Math.max(0, rsvp.words.findIndex((x) => x.para >= startPara));
   rsvp.playing = false;
   $('#rsvpWpm').value = store.settings.rsvpWpm;
   $('#rsvpWpmVal').textContent = store.settings.rsvpWpm + ' mots/min';
   $('#rsvpOverlay').classList.remove('hidden');
   rsvpShow();
-  rsvpSetPlaying(true);
+  // On ouvre en pause : l'utilisateur choisit son point de reprise
+  // (barre, mots du contexte, flèches), puis appuie sur Lire / espace.
+  rsvpSetPlaying(false);
 }
 
 function rsvpShow() {
+  const total = rsvp.words.length;
   const { w } = rsvp.words[rsvp.idx];
   const letters = [...w];
   const orp = Math.min(letters.length - 1, Math.max(0, Math.round((letters.length - 1) * 0.35)));
-  $('#rsvpWord').innerHTML =
+  const wordEl = $('#rsvpWord');
+  wordEl.innerHTML =
     esc(letters.slice(0, orp).join('')) +
     `<span class="orp">${esc(letters[orp])}</span>` +
     esc(letters.slice(orp + 1).join(''));
+  // relance l'animation de « page tournée »
+  wordEl.classList.remove('flip');
+  void wordEl.offsetWidth;
+  wordEl.classList.add('flip');
+
+  // Contexte : mots déjà lus qui s'estompent derrière + mots à venir
+  const before = rsvp.words.slice(Math.max(0, rsvp.idx - 6), rsvp.idx);
+  const after = rsvp.words.slice(rsvp.idx + 1, rsvp.idx + 7);
+  const span = (word, i, cls) =>
+    `<span class="w ${cls}" data-i="${i}">${esc(word.w)}</span>`;
+  $('#rsvpContext').innerHTML =
+    before.map((x, k) => span(x, rsvp.idx - before.length + k, 'read')).join('') +
+    after.map((x, k) => span(x, rsvp.idx + 1 + k, 'ahead')).join('');
+
+  const frac = total > 1 ? rsvp.idx / (total - 1) : 1;
+  $('#rsvpFill').style.width = (frac * 100) + '%';
+  $('#rsvpKnob').style.left = (frac * 100) + '%';
+  const pctRead = Math.round(((rsvp.idx + 1) / total) * 100);
   $('#rsvpProgress').textContent =
-    `${(rsvp.idx + 1).toLocaleString('fr-FR')} / ${rsvp.words.length.toLocaleString('fr-FR')} mots`;
+    `${(rsvp.idx + 1).toLocaleString('fr-FR')} / ${total.toLocaleString('fr-FR')} mots · ${pctRead} % lu`;
+}
+
+// Reprendre à un mot précis (contexte, flèches)
+function rsvpGoto(idx) {
+  rsvp.idx = Math.max(0, Math.min(rsvp.words.length - 1, idx));
+  rsvpShow();
+}
+function rsvpStep(delta) {
+  rsvpSetPlaying(false);
+  rsvpGoto(rsvp.idx + delta);
+}
+// Clic sur la barre : reprise proportionnelle
+function rsvpSeek(fraction) {
+  rsvpSetPlaying(false);
+  rsvpGoto(Math.round(fraction * (rsvp.words.length - 1)));
 }
 
 function rsvpTick() {

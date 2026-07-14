@@ -30,6 +30,7 @@ Les cases cochées sont déjà dans la version actuelle.
 - [x] Mode plein écran immersif (F11, barre escamotable)
 - [x] Chapitres détectés automatiquement avec sommaire interactif
 - [x] Ouverture directe depuis la ligne de commande (`livre chemin.pdf`)
+- [x] Chargement interruptible des gros fichiers (barre de progression + bouton Interrompre)
 
 ## ✍️ Annotations
 
@@ -55,7 +56,8 @@ Les cases cochées sont déjà dans la version actuelle.
 
 - [x] Bionic reading à intensité réglable
 - [x] Mode focus (règle de lecture)
-- [x] Mode RSVP (un mot à la fois, point de fixation rouge, vitesse réglable)
+- [x] Mode RSVP (un mot à la fois, point de fixation rouge, vitesse réglable,
+      reprise à n'importe quel mot, barre de progression, contexte estompé)
 - [ ] Lecture rapide avec mise en évidence
 - [ ] Entraînement à la vitesse de lecture
 - [ ] Objectifs quotidiens

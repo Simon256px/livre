@@ -240,15 +240,19 @@
   <!-- Lecture rapide RSVP -->
   <div id="rsvpOverlay" class="hidden">
     <button class="pill icon" id="rsvpClose">✕</button>
+    <div id="rsvpContext"></div>
     <div id="rsvpWord">prêt ?</div>
+    <div id="rsvpBar" title="Clique pour reprendre où tu veux"><div class="fill" id="rsvpFill"></div><div class="knob" id="rsvpKnob"></div></div>
     <div class="rsvp-controls">
+      <button class="pill icon" id="rsvpBack" title="Mot précédent">‹</button>
       <button class="pill primary" id="rsvpPlay">▶ Lire</button>
+      <button class="pill icon" id="rsvpFwd" title="Mot suivant">›</button>
       <label class="mono">Vitesse <span id="rsvpWpmVal"></span>
         <input type="range" id="rsvpWpm" min="150" max="700" step="25">
       </label>
       <span class="mono" id="rsvpProgress"></span>
     </div>
-    <p class="mono rsvp-hint">espace : pause · échap : quitter</p>
+    <p class="mono rsvp-hint">espace : lire / pause · ← → : mot à mot · clic sur la barre ou un mot : reprendre ici · échap : quitter</p>
   </div>
 
   <!-- Chargement -->
@@ -260,6 +264,8 @@
       <path d="M33 60 Q50 75 67 60" stroke="#1D1A14" stroke-width="4" fill="none" stroke-linecap="round"/>
     </svg>
     <p id="loaderText">Chargement…</p>
+    <div id="loaderBar" class="hidden"><div class="fill" id="loaderFill"></div></div>
+    <button class="pill" id="loaderCancel">✕ Interrompre</button>
   </div>
 
   <div id="toast" class="hidden"></div>
