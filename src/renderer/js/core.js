@@ -61,8 +61,6 @@ const DEFAULT_SETTINGS = {
   focus: false,
   flow: 'pages',   // 'pages' | 'scroll'
   spread: 'auto',  // 'auto' | '1' | '2'
-  ttsVoice: '',
-  ttsRate: 1,
   rsvpWpm: 350,
   dictOnline: false, // dictionnaire Wiktionnaire (requête réseau) — opt-in
 };

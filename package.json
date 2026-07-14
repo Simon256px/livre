@@ -1,13 +1,16 @@
 {
   "name": "livre",
   "productName": "Livre",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Un lecteur qui transforme vos PDF en véritable expérience de lecture — texture papier, typographie soignée, bionic reading.",
   "author": "Simon Courtois <simoncrts@protonmail.com>",
   "license": "MIT",
   "main": "src/main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "make-icon": "electron tools/make-icon.js",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.2.10",
@@ -19,6 +22,44 @@
     "pdfjs-dist": "^3.11.174"
   },
   "devDependencies": {
-    "electron": "^43.1.0"
+    "electron": "^43.1.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.simoncrts.livre",
+    "productName": "Livre",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "package.json",
+      "node_modules/**/*",
+      "!**/*.map"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.png",
+      "artifactName": "Livre-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": false
+    },
+    "fileAssociations": [
+      {
+        "ext": "pdf",
+        "description": "Document PDF",
+        "role": "Viewer"
+      },
+      {
+        "ext": "epub",
+        "description": "Livre EPUB",
+        "role": "Viewer"
+      }
+    ]
   }
 }

@@ -75,7 +75,6 @@
       <button class="pill icon" id="searchBtn" title="Rechercher (Ctrl+F)">⌕</button>
       <button class="pill icon" id="bookmarkBtn" title="Poser un signet">🔖</button>
       <button class="pill icon" id="notesBtn" title="Notes et surlignages">🗒</button>
-      <button class="pill icon" id="ttsBtn" title="Lecture vocale">🔊</button>
       <button class="pill icon" id="rsvpBtn" title="Lecture rapide (RSVP)">⚡</button>
       <button class="pill icon" id="bionicBtn" title="Bionic reading"><b>B</b></button>
       <button class="pill icon" id="focusBtn" title="Mode focus">▤</button>
@@ -205,18 +204,6 @@
 
       <hr class="rule dotted">
 
-      <div class="setting">
-        <label for="ttsVoice">Voix (lecture vocale)</label>
-        <select id="ttsVoice"></select>
-      </div>
-
-      <div class="setting">
-        <label for="ttsRate">Vitesse de la voix <span class="val" id="ttsRateVal"></span></label>
-        <input type="range" id="ttsRate" min="0.7" max="1.6" step="0.05">
-      </div>
-
-      <hr class="rule dotted">
-
       <div class="setting toggle-row">
         <label for="dictChk">Dictionnaire en ligne</label>
         <input type="checkbox" id="dictChk">
@@ -251,9 +238,14 @@
   <!-- Lecture rapide RSVP -->
   <div id="rsvpOverlay" class="hidden">
     <button class="pill icon" id="rsvpClose">✕</button>
+    <div id="rsvpChapter" class="mono"></div>
     <div id="rsvpContext"></div>
     <div id="rsvpWord">prêt ?</div>
-    <div id="rsvpBar" title="Clique pour reprendre où tu veux"><div class="fill" id="rsvpFill"></div><div class="knob" id="rsvpKnob"></div></div>
+    <div id="rsvpBar" title="Clique pour reprendre où tu veux">
+      <div class="fill" id="rsvpFill"></div>
+      <div id="rsvpTicks"></div>
+      <div class="knob" id="rsvpKnob"></div>
+    </div>
     <div class="rsvp-controls">
       <button class="pill icon" id="rsvpBack" title="Mot précédent">‹</button>
       <button class="pill primary" id="rsvpPlay">▶ Lire</button>
@@ -263,7 +255,8 @@
       </label>
       <span class="mono" id="rsvpProgress"></span>
     </div>
-    <p class="mono rsvp-hint">espace : lire / pause · ← → : mot à mot · clic sur la barre ou un mot : reprendre ici · échap : quitter</p>
+    <div id="rsvpPreview" title="Clique un mot pour reprendre ici"></div>
+    <p class="mono rsvp-hint">espace : lire / pause · ← → : mot à mot · clique un mot ci-dessus pour reprendre ici · échap : quitter</p>
   </div>
 
   <!-- Chargement -->

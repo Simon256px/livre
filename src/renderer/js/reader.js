@@ -51,7 +51,6 @@ async function openBook(id) {
 
 function closeReader() {
   stopTimer();
-  ttsStop();
   closeSearch(false);
   current = null;
   $$('.drawer').forEach((d) => d.classList.remove('open'));

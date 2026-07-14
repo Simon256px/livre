@@ -1,96 +1,24 @@
 'use strict';
 
-/* ═══════════ Lecture vocale (TTS) & lecture rapide (RSVP) ═══════════ */
+/* ═══════════ Lecture rapide (RSVP) ═══════════
+   Affiche le texte un mot à la fois, avec un point de fixation. En
+   pause, un aperçu lisible du passage permet de choisir visuellement
+   où (re)commencer : chaque mot est cliquable, le mot courant est mis
+   en évidence, et la barre porte des repères de chapitres.          */
 
-/* ---------- TTS ---------- */
-
-let ttsActive = false;
-let ttsPara = -1;
-
-function ttsVoices() {
-  return speechSynthesis.getVoices();
-}
-
-function populateVoices() {
-  const sel = $('#ttsVoice');
-  const voices = ttsVoices();
-  if (!voices.length) { sel.innerHTML = '<option value="">(aucune voix système)</option>'; return; }
-  const sorted = [...voices].sort((a, b) =>
-    (b.lang.startsWith('fr') ? 1 : 0) - (a.lang.startsWith('fr') ? 1 : 0));
-  sel.innerHTML = sorted.map((v) =>
-    `<option value="${esc(v.name)}">${esc(v.name)} (${v.lang})</option>`).join('');
-  if (store.settings.ttsVoice && sorted.some((v) => v.name === store.settings.ttsVoice)) {
-    sel.value = store.settings.ttsVoice;
-  } else {
-    store.settings.ttsVoice = sel.value;
-  }
-}
-
-function ttsToggle() {
-  if (ttsActive) { ttsStop(); return; }
-  if (!current) return;
-  if (!('speechSynthesis' in window) || !ttsVoices().length) {
-    toast('Aucune voix de synthèse disponible');
-    return;
-  }
-  ttsActive = true;
-  $('#ttsBtn').classList.add('on');
-  ttsSpeakFrom(firstTextPara(current.book.anchor ?? 0));
-}
+const rsvp = { words: [], idx: 0, playing: false, timer: null };
 
 function firstTextPara(from) {
   for (let i = from; i < current.paras.length; i++) {
     if (current.paras[i].type !== 'img') return i;
   }
-  return -1;
+  return 0;
 }
-
-function ttsSpeakFrom(i) {
-  if (!ttsActive || !current || i < 0 || i >= current.paras.length) { ttsStop(); return; }
-  const p = current.paras[i];
-  if (p.type === 'img') { ttsSpeakFrom(i + 1); return; }
-  ttsPara = i;
-  ttsMark(i);
-  const u = new SpeechSynthesisUtterance(p.text);
-  const voice = ttsVoices().find((v) => v.name === store.settings.ttsVoice);
-  if (voice) u.voice = voice;
-  u.rate = store.settings.ttsRate;
-  u.onend = () => { if (ttsActive) ttsSpeakFrom(i + 1); };
-  u.onerror = () => ttsStop();
-  speechSynthesis.speak(u);
-}
-
-function ttsMark(i) {
-  $$('#bookContent .speaking').forEach((el) => el.classList.remove('speaking'));
-  const el = $(`#bookContent [data-i="${i}"]`);
-  if (!el) return;
-  el.classList.add('speaking');
-  if (store.settings.flow === 'scroll') {
-    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
-    onScrolled();
-  } else {
-    const page = Math.floor(colOf(el) / current.cols);
-    if (page !== current.page) goTo(page);
-  }
-}
-
-function ttsStop() {
-  ttsActive = false;
-  ttsPara = -1;
-  try { speechSynthesis.cancel(); } catch {}
-  $('#ttsBtn')?.classList.remove('on');
-  $$('#bookContent .speaking').forEach((el) => el.classList.remove('speaking'));
-}
-
-/* ---------- RSVP ---------- */
-
-const rsvp = { words: [], idx: 0, playing: false, timer: null };
 
 function rsvpOpen() {
   if (!current) return;
-  ttsStop();
-  // Le flux complet du livre est indexé pour pouvoir revenir en
-  // arrière ; on démarre au paragraphe de lecture courant.
+  // Tout le livre est indexé (mot → paragraphe) pour permettre de
+  // remonter librement ; on démarre au paragraphe de lecture courant.
   rsvp.words = [];
   for (let i = 0; i < current.paras.length; i++) {
     const p = current.paras[i];
@@ -102,19 +30,36 @@ function rsvpOpen() {
   if (!rsvp.words.length) { toast('Rien à lire ici'); return; }
   const startPara = firstTextPara(current.book.anchor ?? 0);
   rsvp.idx = Math.max(0, rsvp.words.findIndex((x) => x.para >= startPara));
-  rsvp.playing = false;
   $('#rsvpWpm').value = store.settings.rsvpWpm;
   $('#rsvpWpmVal').textContent = store.settings.rsvpWpm + ' mots/min';
+  rsvpBuildTicks();
   $('#rsvpOverlay').classList.remove('hidden');
-  rsvpShow();
   // On ouvre en pause : l'utilisateur choisit son point de reprise
-  // (barre, mots du contexte, flèches), puis appuie sur Lire / espace.
+  // dans l'aperçu, puis appuie sur Lire / espace.
   rsvpSetPlaying(false);
+  rsvpShow();
+}
+
+// Repères de chapitres le long de la barre de progression
+function rsvpBuildTicks() {
+  const firstWordOfPara = {};
+  rsvp.words.forEach((wd, i) => {
+    if (firstWordOfPara[wd.para] === undefined) firstWordOfPara[wd.para] = i;
+  });
+  const total = rsvp.words.length;
+  const ticks = (current.toc || [])
+    .filter((h) => firstWordOfPara[h.i] !== undefined)
+    .map((h) => ({ frac: firstWordOfPara[h.i] / Math.max(1, total - 1), text: h.text }));
+  $('#rsvpTicks').innerHTML = ticks.map((t) =>
+    `<span class="tick" style="left:${(t.frac * 100).toFixed(2)}%" title="${esc(t.text)}"></span>`
+  ).join('');
 }
 
 function rsvpShow() {
   const total = rsvp.words.length;
-  const { w } = rsvp.words[rsvp.idx];
+  const { w, para } = rsvp.words[rsvp.idx];
+
+  // Mot courant, découpé autour du point de fixation optimal (ORP)
   const letters = [...w];
   const orp = Math.min(letters.length - 1, Math.max(0, Math.round((letters.length - 1) * 0.35)));
   const wordEl = $('#rsvpWord');
@@ -122,19 +67,22 @@ function rsvpShow() {
     esc(letters.slice(0, orp).join('')) +
     `<span class="orp">${esc(letters[orp])}</span>` +
     esc(letters.slice(orp + 1).join(''));
-  // relance l'animation de « page tournée »
   wordEl.classList.remove('flip');
   void wordEl.offsetWidth;
   wordEl.classList.add('flip');
 
-  // Contexte : mots déjà lus qui s'estompent derrière + mots à venir
+  $('#rsvpChapter').textContent = (typeof chapterOf === 'function' && chapterOf(para)) || '';
+
+  // Fil d'ariane estompé (visible en lecture)
   const before = rsvp.words.slice(Math.max(0, rsvp.idx - 6), rsvp.idx);
   const after = rsvp.words.slice(rsvp.idx + 1, rsvp.idx + 7);
-  const span = (word, i, cls) =>
-    `<span class="w ${cls}" data-i="${i}">${esc(word.w)}</span>`;
+  const chip = (word, i, cls) => `<span class="w ${cls}" data-i="${i}">${esc(word.w)}</span>`;
   $('#rsvpContext').innerHTML =
-    before.map((x, k) => span(x, rsvp.idx - before.length + k, 'read')).join('') +
-    after.map((x, k) => span(x, rsvp.idx + 1 + k, 'ahead')).join('');
+    before.map((x, k) => chip(x, rsvp.idx - before.length + k, 'read')).join('') +
+    after.map((x, k) => chip(x, rsvp.idx + 1 + k, 'ahead')).join('');
+
+  // Aperçu lisible (visible en pause) : on ne le recalcule qu'à l'arrêt
+  if (!rsvp.playing) rsvpRenderPreview();
 
   const frac = total > 1 ? rsvp.idx / (total - 1) : 1;
   $('#rsvpFill').style.width = (frac * 100) + '%';
@@ -144,7 +92,26 @@ function rsvpShow() {
     `${(rsvp.idx + 1).toLocaleString('fr-FR')} / ${total.toLocaleString('fr-FR')} mots · ${pctRead} % lu`;
 }
 
-// Reprendre à un mot précis (contexte, flèches)
+// Passage lisible autour du mot courant : mot en évidence, tout cliquable
+function rsvpRenderPreview() {
+  const from = Math.max(0, rsvp.idx - 45);
+  const to = Math.min(rsvp.words.length, rsvp.idx + 45);
+  let html = '';
+  let lastPara = null;
+  for (let i = from; i < to; i++) {
+    const wd = rsvp.words[i];
+    if (lastPara !== null && wd.para !== lastPara) html += '<span class="pbreak"></span>';
+    lastPara = wd.para;
+    const cls = i === rsvp.idx ? 'now' : (i < rsvp.idx ? 'read' : 'ahead');
+    html += `<span class="w ${cls}" data-i="${i}">${esc(wd.w)}</span> `;
+  }
+  const prev = $('#rsvpPreview');
+  prev.innerHTML = html;
+  const now = $('.now', prev);
+  if (now) now.scrollIntoView({ block: 'center' });
+}
+
+// Reprendre à un mot précis (clic sur l'aperçu, le contexte, ou les flèches)
 function rsvpGoto(idx) {
   rsvp.idx = Math.max(0, Math.min(rsvp.words.length - 1, idx));
   rsvpShow();
@@ -176,7 +143,9 @@ function rsvpSetPlaying(on) {
   rsvp.playing = on;
   clearTimeout(rsvp.timer);
   $('#rsvpPlay').textContent = on ? '⏸ Pause' : '▶ Lire';
+  $('#rsvpOverlay').classList.toggle('playing', on);
   if (on) rsvp.timer = setTimeout(rsvpTick, 60000 / store.settings.rsvpWpm);
+  else rsvpRenderPreview(); // rafraîchit l'aperçu au moment où l'on s'arrête
 }
 
 function rsvpClose() {

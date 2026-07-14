@@ -20,8 +20,6 @@ function syncControls() {
   $('#intensityRange').value = s.bionicIntensity;
   $('#intensityVal').textContent = Math.round(s.bionicIntensity * 100) + ' %';
   $('#focusChk').checked = s.focus;
-  $('#ttsRate').value = s.ttsRate;
-  $('#ttsRateVal').textContent = s.ttsRate.toFixed(2) + '×';
   $('#dictChk').checked = s.dictOnline;
   $('#bionicBtn').classList.toggle('on', s.bionic);
   $('#focusBtn').classList.toggle('on', s.focus);
@@ -86,7 +84,6 @@ function buildUI() {
     renderNotesDrawer();
     toggleDrawer('#notesDrawer');
   });
-  $('#ttsBtn').addEventListener('click', ttsToggle);
   $('#rsvpBtn').addEventListener('click', rsvpOpen);
   $('#bionicBtn').addEventListener('click', () => {
     store.settings.bionic = !store.settings.bionic;
@@ -161,14 +158,6 @@ function buildUI() {
   });
   $('#focusChk').addEventListener('change', (e) => {
     store.settings.focus = e.target.checked;
-    applySettings(false);
-  });
-  $('#ttsVoice').addEventListener('change', (e) => {
-    store.settings.ttsVoice = e.target.value;
-    persist();
-  });
-  $('#ttsRate').addEventListener('input', (e) => {
-    store.settings.ttsRate = Number(e.target.value);
     applySettings(false);
   });
   $('#dictChk').addEventListener('change', (e) => {
@@ -325,11 +314,6 @@ function buildUI() {
     const ids = await addBooks(paths);
     if (ids.length) openBook(ids[0]);
   });
-
-  if ('speechSynthesis' in window) {
-    populateVoices();
-    speechSynthesis.addEventListener('voiceschanged', populateVoices);
-  }
 }
 
 /* ---------- Démarrage ---------- */

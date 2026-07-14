@@ -12,9 +12,10 @@ Les cases cochées sont déjà dans la version actuelle.
 - ~~v0.2 — Lire confortablement + annoter~~ ✅ livré
 - ~~v0.2.1 — Chargement interruptible, RSVP libre~~ ✅ livré
 - ~~v0.3 — Dictionnaire (Wiktionnaire), reprise fiable~~ ✅ livré
-- **v0.4 — OCR** : PDF scannés via Tesseract embarqué
-- **v0.5 — Confort** : objectifs quotidiens, Pomodoro, collections et tags
-- **v0.6 — Écosystème** : import/export de la bibliothèque, thèmes
+- ~~v0.4 — RSVP visuel, TTS retiré, installeur Windows~~ ✅ livré
+- **v0.5 — OCR** : PDF scannés via Tesseract embarqué
+- **v0.6 — Confort** : objectifs quotidiens, Pomodoro, collections et tags
+- **v0.7 — Écosystème** : import/export de la bibliothèque, thèmes
   personnalisés, import de polices
 
 ## 📚 Lecture
@@ -57,7 +58,8 @@ Les cases cochées sont déjà dans la version actuelle.
 - [x] Bionic reading à intensité réglable
 - [x] Mode focus (règle de lecture)
 - [x] Mode RSVP (un mot à la fois, point de fixation rouge, vitesse réglable,
-      reprise à n'importe quel mot, barre de progression, contexte estompé)
+      reprise à n'importe quel mot via un aperçu lisible cliquable, repères de
+      chapitres sur la barre de progression)
 - [ ] Lecture rapide avec mise en évidence
 - [ ] Entraînement à la vitesse de lecture
 - [ ] Objectifs quotidiens
@@ -116,8 +118,9 @@ Les cases cochées sont déjà dans la version actuelle.
 
 ## 🎧 Accessibilité
 
-- [x] Lecture vocale (Text-to-Speech, voix système, vitesse réglable)
-- [x] Suivi visuel pendant la lecture audio (paragraphe surligné, pages tournées)
+- [ ] Lecture vocale (Text-to-Speech) — retirée en v0.4 : les voix système
+      françaises étaient trop robotiques ; à reconsidérer avec des voix
+      neurales locales (type Piper)
 - [ ] Compatibilité avec les lecteurs d'écran
 - [ ] Contraste élevé
 - [x] Police OpenDyslexic
