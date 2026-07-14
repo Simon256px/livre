@@ -32,8 +32,10 @@ Livre est une application de bureau (Electron) qui prend vos PDF et EPUB et les 
 - **Export des annotations en Markdown**, regroupées par chapitre
 
 ### Bibliothèque & statistiques
-- Couvertures extraites automatiquement, progression, recherche par titre/auteur
+- Couvertures extraites automatiquement, progression, recherche par titre/auteur/tag
+- **Étagères** automatiques (À lire / En cours / Terminés), **favoris** ★ et **tags** éditables
 - **Reprise exacte** de la lecture, ancrée au paragraphe (survit aux changements de mise en page)
+- **Objectif quotidien** (anneau de progression) et **minuteur Pomodoro** lecture/pause
 - **Stats quotidiennes** : temps de lecture, streak 🔥, vitesse moyenne, graphique 14 jours
 
 ## 🚀 Utilisation

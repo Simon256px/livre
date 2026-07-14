@@ -51,6 +51,7 @@ async function openBook(id) {
 
 function closeReader() {
   stopTimer();
+  pomodoroStop();
   closeSearch(false);
   current = null;
   $$('.drawer').forEach((d) => d.classList.remove('open'));

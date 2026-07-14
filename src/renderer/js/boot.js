@@ -21,6 +21,12 @@ function syncControls() {
   $('#intensityVal').textContent = Math.round(s.bionicIntensity * 100) + ' %';
   $('#focusChk').checked = s.focus;
   $('#dictChk').checked = s.dictOnline;
+  $('#goalRange').value = s.dailyGoalMin;
+  $('#goalVal').textContent = s.dailyGoalMin ? s.dailyGoalMin + ' min' : 'off';
+  $('#pomoFocusRange').value = s.pomodoroFocus;
+  $('#pomoFocusVal').textContent = s.pomodoroFocus + ' min';
+  $('#pomoBreakRange').value = s.pomodoroBreak;
+  $('#pomoBreakVal').textContent = s.pomodoroBreak + ' min';
   $('#bionicBtn').classList.toggle('on', s.bionic);
   $('#focusBtn').classList.toggle('on', s.focus);
   updateFocusRuler();
@@ -74,6 +80,13 @@ function buildUI() {
     libraryQuery = e.target.value;
     renderLibrary();
   }, 200));
+  $$('#shelfBar .shelf').forEach((btn) =>
+    btn.addEventListener('click', () => setShelf(btn.dataset.shelf)));
+  $('#tagChips').addEventListener('click', (e) => {
+    const chip = e.target.closest('.tagchip');
+    if (chip) setTagFilter(chip.dataset.tag);
+  });
+  $('#statGoal').addEventListener('click', editDailyGoal);
 
   /* --- Barre de lecture --- */
   $('#backBtn').addEventListener('click', closeReader);
@@ -85,6 +98,8 @@ function buildUI() {
     toggleDrawer('#notesDrawer');
   });
   $('#rsvpBtn').addEventListener('click', rsvpOpen);
+  $('#pomodoroBtn').addEventListener('click', pomodoroToggle);
+  $('#pomoStop').addEventListener('click', pomodoroStop);
   $('#bionicBtn').addEventListener('click', () => {
     store.settings.bionic = !store.settings.bionic;
     applySettings(true);
@@ -162,6 +177,22 @@ function buildUI() {
   });
   $('#dictChk').addEventListener('change', (e) => {
     store.settings.dictOnline = e.target.checked;
+    persist();
+  });
+  $('#goalRange').addEventListener('input', (e) => {
+    store.settings.dailyGoalMin = Number(e.target.value);
+    syncControls();
+    persist();
+    renderStatsPanel();
+  });
+  $('#pomoFocusRange').addEventListener('input', (e) => {
+    store.settings.pomodoroFocus = Number(e.target.value);
+    syncControls();
+    persist();
+  });
+  $('#pomoBreakRange').addEventListener('input', (e) => {
+    store.settings.pomodoroBreak = Number(e.target.value);
+    syncControls();
     persist();
   });
 
@@ -328,6 +359,8 @@ function buildUI() {
       author: '',
       annotations: [],
       bookmarks: [],
+      favorite: false,
+      tags: [],
       ...b,
     }));
     store.stats = store.stats || { daily: {} };

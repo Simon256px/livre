@@ -14,7 +14,7 @@ Les cases cochées sont déjà dans la version actuelle.
 - ~~v0.3 — Dictionnaire (Wiktionnaire), reprise fiable~~ ✅ livré
 - ~~v0.4 — RSVP visuel, TTS retiré, installeur Windows~~ ✅ livré
 - ~~v0.5 — OCR des PDF scannés (Tesseract embarqué)~~ ✅ livré
-- **v0.6 — Confort** : objectifs quotidiens, Pomodoro, collections et tags
+- ~~v0.6 — Confort : objectif quotidien, Pomodoro, favoris/tags/étagères~~ ✅ livré
 - **v0.7 — Écosystème** : import/export de la bibliothèque, thèmes
   personnalisés, import de polices
 
@@ -62,8 +62,8 @@ Les cases cochées sont déjà dans la version actuelle.
       chapitres sur la barre de progression)
 - [ ] Lecture rapide avec mise en évidence
 - [ ] Entraînement à la vitesse de lecture
-- [ ] Objectifs quotidiens
-- [ ] Sessions Pomodoro intégrées
+- [x] Objectifs quotidiens (anneau de progression + ligne d'objectif sur le graphique)
+- [x] Sessions Pomodoro intégrées (lecture/pause, badge compte à rebours, bip)
 
 ## 📊 Statistiques
 
@@ -101,9 +101,9 @@ Les cases cochées sont déjà dans la version actuelle.
 
 - [x] Livres récemment ouverts (tri par dernière ouverture)
 - [x] Recherche plein texte dans le livre (Ctrl+F, insensible aux accents)
-- [x] Recherche dans la bibliothèque (titre et auteur)
+- [x] Recherche dans la bibliothèque (titre, auteur et tags)
 - [ ] Recherche dans les annotations
-- [ ] Recherche par tags
+- [x] Recherche par tags (puces de filtrage + étagères)
 - [ ] Filtres intelligents
 
 ## 🤖 Fonctionnalités IA (opt-in, jamais requises)
@@ -131,10 +131,10 @@ Les cases cochées sont déjà dans la version actuelle.
 ## 📱 Bibliothèque
 
 - [x] Couvertures extraites automatiquement, progression par livre
-- [ ] Collections personnalisées
-- [ ] Étagères virtuelles
-- [ ] Étiquettes (tags)
-- [ ] Favoris
+- [ ] Collections personnalisées (nommées, manuelles)
+- [x] Étagères virtuelles (À lire / En cours / Terminés, automatiques)
+- [x] Étiquettes (tags) éditables par livre
+- [x] Favoris
 - [ ] Tri intelligent
 - [ ] Recommandations basées sur les habitudes de lecture
 - [ ] Affichage en grille, liste ou étagère

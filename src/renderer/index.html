@@ -42,10 +42,19 @@
     <hr class="rule">
 
     <div id="statsPanel">
-      <div class="stat"><span class="stat-num" id="statToday">0 min</span><span class="stat-label">aujourd’hui</span></div>
+      <div class="stat goal" id="statGoal" title="Objectif quotidien — clique pour le régler"></div>
       <div class="stat"><span class="stat-num" id="statStreak">0 j</span><span class="stat-label">streak 🔥</span></div>
       <div class="stat"><span class="stat-num" id="statWpm">—</span><span class="stat-label">mots / min</span></div>
       <div id="statChart"></div>
+    </div>
+
+    <div id="shelfBar">
+      <button class="pill shelf active" data-shelf="all">Tous</button>
+      <button class="pill shelf" data-shelf="reading">En cours</button>
+      <button class="pill shelf" data-shelf="unread">À lire</button>
+      <button class="pill shelf" data-shelf="done">Terminés</button>
+      <button class="pill shelf" data-shelf="fav">★ Favoris</button>
+      <span id="tagChips"></span>
     </div>
 
     <p class="stats" id="libStats"></p>
@@ -75,6 +84,7 @@
       <button class="pill icon" id="searchBtn" title="Rechercher (Ctrl+F)">⌕</button>
       <button class="pill icon" id="bookmarkBtn" title="Poser un signet">🔖</button>
       <button class="pill icon" id="notesBtn" title="Notes et surlignages">🗒</button>
+      <button class="pill icon" id="pomodoroBtn" title="Minuteur Pomodoro">🍅</button>
       <button class="pill icon" id="rsvpBtn" title="Lecture rapide (RSVP)">⚡</button>
       <button class="pill icon" id="bionicBtn" title="Bionic reading"><b>B</b></button>
       <button class="pill icon" id="focusBtn" title="Mode focus">▤</button>
@@ -209,6 +219,24 @@
         <input type="checkbox" id="dictChk">
       </div>
       <p class="setting-note">Double-clique un mot pour sa définition (Wiktionnaire, connexion requise).</p>
+
+      <hr class="rule dotted">
+      <h3 class="drawer-sub">Concentration &amp; objectifs</h3>
+
+      <div class="setting">
+        <label for="goalRange">Objectif quotidien <span class="val" id="goalVal"></span></label>
+        <input type="range" id="goalRange" min="0" max="120" step="5">
+      </div>
+
+      <div class="setting">
+        <label for="pomoFocusRange">Pomodoro — lecture <span class="val" id="pomoFocusVal"></span></label>
+        <input type="range" id="pomoFocusRange" min="10" max="60" step="5">
+      </div>
+
+      <div class="setting">
+        <label for="pomoBreakRange">Pomodoro — pause <span class="val" id="pomoBreakVal"></span></label>
+        <input type="range" id="pomoBreakRange" min="3" max="20" step="1">
+      </div>
     </aside>
   </section>
 
@@ -272,6 +300,12 @@
     <button class="pill" id="loaderCancel">✕ Interrompre</button>
   </div>
 
+  <!-- Badge Pomodoro -->
+  <div id="pomodoroBadge" class="hidden">
+    🍅 <span id="pomoPhase"></span> <span id="pomoTime" class="mono"></span>
+    <button id="pomoStop" title="Arrêter">✕</button>
+  </div>
+
   <div id="toast" class="hidden"></div>
 
   <script src="../../node_modules/pdfjs-dist/build/pdf.min.js"></script>
@@ -284,6 +318,7 @@
   <script src="js/annotations.js"></script>
   <script src="js/dictionary.js"></script>
   <script src="js/media.js"></script>
+  <script src="js/focus.js"></script>
   <script src="js/library.js"></script>
   <script src="js/boot.js"></script>
 </body>

@@ -63,6 +63,9 @@ const DEFAULT_SETTINGS = {
   spread: 'auto',  // 'auto' | '1' | '2'
   rsvpWpm: 350,
   dictOnline: false, // dictionnaire Wiktionnaire (requête réseau) — opt-in
+  dailyGoalMin: 20,  // objectif de lecture quotidien en minutes (0 = off)
+  pomodoroFocus: 25, // durée d'une session de lecture (minutes)
+  pomodoroBreak: 5,  // durée d'une pause (minutes)
 };
 
 let store = { version: 2, settings: { ...DEFAULT_SETTINGS }, books: [], stats: { daily: {} } };
