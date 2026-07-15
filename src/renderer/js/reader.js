@@ -115,6 +115,7 @@ function renderContent() {
     if (p.type === 'img') return `<figure data-i="${i}"><img src="${p.src}" alt=""></figure>`;
     return `<p data-i="${i}">${renderParaHTML(p, i)}</p>`;
   }).join('');
+  applyPageAnimStyle();
 }
 
 /* ---------- Pagination (pages / double page / défilement) ---------- */
@@ -193,12 +194,31 @@ function goTo(page, save = true) {
   tocHighlight();
 }
 
-// Navigation utilisateur (boutons, molette, flèches) : joue le son de page
+// Navigation utilisateur (boutons, molette, flèches) : son + animation
 function turnPage(delta) {
   if (!current) return;
   const before = current.page;
   goTo(current.page + delta);
-  if (store.settings.flow === 'pages' && current.page !== before) playPageSound();
+  if (store.settings.flow === 'pages' && current.page !== before) {
+    playPageSound();
+    triggerPageTurn(delta);
+  }
+}
+
+// Applique la transition selon le réglage d'animation
+function applyPageAnimStyle() {
+  const c = $('#bookContent');
+  if (c) c.style.transition = store.settings.pageAnim === 'none' ? 'none' : 'transform .26s ease';
+}
+
+// Balayage « page tournée » dans le sens de la navigation
+function triggerPageTurn(delta) {
+  if (store.settings.pageAnim !== 'curl' || store.settings.flow === 'scroll') return;
+  const el = $('#pageTurn');
+  if (!el) return;
+  el.classList.remove('next', 'prev');
+  void el.offsetWidth; // redémarre l'animation
+  el.classList.add(delta > 0 ? 'next' : 'prev');
 }
 
 // En mode défilement, les boutons/flèches font défiler d'un écran

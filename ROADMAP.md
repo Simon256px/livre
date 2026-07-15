@@ -16,10 +16,11 @@ Les cases cochées sont déjà dans la version actuelle.
 - ~~v0.5 — OCR des PDF scannés (Tesseract embarqué)~~ ✅ livré
 - ~~v0.6 — Confort : objectif quotidien, Pomodoro, favoris/tags/étagères~~ ✅ livré
 - ~~v0.7 — Export PDF, recherche notes, import/export biblio, contraste, marges, sons~~ ✅ livré
-- **v0.8 — Personnalisation** : thèmes et couleurs sur mesure, import de polices,
-  animation de page tournée
+- ~~v0.8 — Personnalisation : thème/couleurs sur mesure, import de polices, page tournée~~ ✅ livré
+- **v0.9 — Confort avancé** : lecture verticale/horizontale, affichage liste/étagère,
+  collections nommées, tri intelligent, pages lues par jour
 - **Plus tard** : traduction/Wikipédia (opt-in), fonctions IA (opt-in),
-  voix neurales locales, sync automatique multi-appareils
+  voix neurales locales, sync automatique multi-appareils, lecteurs d'écran
 
 ## 📚 Lecture
 
@@ -86,11 +87,11 @@ Les cases cochées sont déjà dans la version actuelle.
 - [x] Taille, interligne, largeur de page, justification réglables
 - [x] 7 polices (Literata, Atkinson Hyperlegible, IBM Plex Serif,
       OpenDyslexic, Georgia, Palatino, Segoe UI)
-- [ ] Import de polices personnalisées
-- [ ] Création de thèmes
-- [ ] Couleurs personnalisables
+- [x] Import de polices personnalisées (.ttf/.otf/.woff, embarquées dans le profil)
+- [x] Création de thèmes (thème « perso » sur mesure)
+- [x] Couleurs personnalisables (fond, page, texte)
 - [x] Marges et colonnes réglables (marges + simple/double page/défilement)
-- [ ] Animation de changement de page (page tournée / courbée)
+- [x] Animation de changement de page (glissement / page tournée / aucune)
 - [x] Sons de page (souffle de tournage, activable)
 
 ## ☁️ Synchronisation

@@ -2,13 +2,80 @@
 
 /* ═══════════ Câblage de l'interface & démarrage ═══════════ */
 
+// Thème sur mesure : variables CSS inline quand le thème « perso » est actif
+function applyCustomTheme() {
+  const b = document.body;
+  const vars = ['--bg', '--paper', '--ink', '--muted', '--dim', '--grain-op'];
+  if (store.settings.theme === 'perso') {
+    const c = store.settings.custom || {};
+    b.style.setProperty('--bg', c.bg);
+    b.style.setProperty('--paper', c.paper);
+    b.style.setProperty('--ink', c.ink);
+    b.style.setProperty('--muted', `rgba(${hexToRgb(c.ink)}, .5)`);
+    b.style.setProperty('--dim', `rgba(${hexToRgb(c.bg)}, .82)`);
+    b.style.setProperty('--grain-op', '.05');
+  } else {
+    vars.forEach((v) => b.style.removeProperty(v));
+  }
+}
+
+// Polices importées : enregistrement FontFace + entrées du menu déroulant
+function registerCustomFont(name, dataB64) {
+  try {
+    const bin = atob(dataB64);
+    const u8 = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    const face = new FontFace(name, u8.buffer);
+    face.load().then((f) => document.fonts.add(f)).catch(() => {});
+    FONTS['custom:' + name] = `'${name}', 'Segoe UI', sans-serif`;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function rebuildFontSelect() {
+  const grp = $('#fontCustom');
+  const fonts = store.settings.customFonts || [];
+  grp.innerHTML = fonts.map((f) => `<option value="custom:${esc(f.name)}">${esc(f.name)}</option>`).join('');
+  grp.style.display = fonts.length ? '' : 'none';
+}
+
+async function importFontFile() {
+  const path = window.LIVRE_TEST_FONT || await window.livre.pickFont();
+  if (!path) return;
+  const bytes = await window.livre.readFile(path);
+  const u8 = new Uint8Array(bytes);
+  let bin = '';
+  const CH = 0x8000;
+  for (let i = 0; i < u8.length; i += CH) bin += String.fromCharCode.apply(null, u8.subarray(i, i + CH));
+  const dataB64 = btoa(bin);
+  const name = basename(path).replace(/\.(ttf|otf|woff2?|ttc)$/i, '').slice(0, 40);
+  if (!registerCustomFont(name, dataB64)) { toast('Police illisible'); return; }
+  store.settings.customFonts = (store.settings.customFonts || []).filter((f) => f.name !== name);
+  store.settings.customFonts.push({ name, data: dataB64 });
+  store.settings.font = 'custom:' + name;
+  rebuildFontSelect();
+  persist();
+  await document.fonts.ready;
+  syncControls();
+  relayout();
+  toast(`Police « ${name} » importée`);
+}
+
 function syncControls() {
   const s = store.settings;
   document.body.dataset.theme = s.theme;
+  applyCustomTheme();
   $$('.dot').forEach((d) => d.classList.toggle('active', d.dataset.theme === s.theme));
   $('#fontSelect').value = s.font;
   $('#flowSelect').value = s.flow;
   $('#spreadSelect').value = s.spread;
+  $('#animSelect').value = s.pageAnim;
+  $('#colBg').value = s.custom.bg;
+  $('#colPaper').value = s.custom.paper;
+  $('#colInk').value = s.custom.ink;
+  applyPageAnimStyle();
   $('#sizeRange').value = s.fontSize;
   $('#sizeVal').textContent = s.fontSize + ' px';
   $('#lhRange').value = s.lineHeight;
@@ -160,6 +227,23 @@ function buildUI() {
     store.settings.spread = e.target.value;
     applySettings(true);
   });
+  $('#animSelect').addEventListener('change', (e) => {
+    store.settings.pageAnim = e.target.value;
+    applyPageAnimStyle();
+    persist();
+  });
+  $('#fontImportBtn').addEventListener('click', importFontFile);
+  const onCustomColor = () => {
+    store.settings.custom = {
+      bg: $('#colBg').value,
+      paper: $('#colPaper').value,
+      ink: $('#colInk').value,
+    };
+    store.settings.theme = 'perso';
+    applySettings(false);
+  };
+  ['#colBg', '#colPaper', '#colInk'].forEach((id) =>
+    $(id).addEventListener('input', onCustomColor));
   $('#sizeRange').addEventListener('input', (e) => {
     store.settings.fontSize = Number(e.target.value);
     applySettings(true);
@@ -387,8 +471,13 @@ function buildUI() {
     }));
     store.stats = store.stats || { daily: {} };
     store.stats.daily = store.stats.daily || {};
+    store.settings.custom = { ...DEFAULT_SETTINGS.custom, ...(store.settings.custom || {}) };
+    store.settings.customFonts = store.settings.customFonts || [];
   }
+  // Ré-enregistre les polices importées avant de bâtir l'interface
+  store.settings.customFonts.forEach((f) => registerCustomFont(f.name, f.data));
   buildUI();
+  rebuildFontSelect();
   syncControls();
   renderLibrary();
 })();

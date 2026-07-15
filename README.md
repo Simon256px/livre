@@ -32,8 +32,9 @@ Livre est une application de bureau (Electron) qui prend vos PDF et EPUB et les 
 - **Recherche** dans les notes ; **export Markdown et PDF**, regroupés par chapitre
 
 ### Personnalisation & accessibilité
-- 5 thèmes dont un **contraste élevé** (noir sur blanc, sans grain)
-- Marges réglables, **sons de tournage de page** (activables)
+- 5 thèmes dont un **contraste élevé**, plus un **thème sur mesure** (couleurs fond/page/texte)
+- **Import de polices** personnalisées (.ttf/.otf/.woff)
+- Marges réglables, **animations de page** (glissement / page tournée / aucune), **sons de tournage**
 - Police OpenDyslexic, navigation clavier
 
 ### Bibliothèque & statistiques

@@ -91,6 +91,15 @@ ipcMain.handle('pick-books', async () => {
 
 ipcMain.handle('read-file', (_e, filePath) => fs.readFile(filePath));
 
+ipcMain.handle('pick-font', async () => {
+  const r = await dialog.showOpenDialog(win, {
+    title: 'Importer une police',
+    filters: [{ name: 'Polices', extensions: ['ttf', 'otf', 'woff', 'woff2'] }],
+    properties: ['openFile'],
+  });
+  return r.canceled ? null : r.filePaths[0];
+});
+
 ipcMain.handle('load-store', async () => {
   try {
     return JSON.parse(await fs.readFile(storePath(), 'utf8'));

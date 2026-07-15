@@ -37,7 +37,7 @@ const PDF_OPTS = {
 
 const GAP = 64; // espace entre deux colonnes-pages
 const CACHE_V = 4; // à incrémenter quand la logique d'extraction change
-const THEMES = ['creme', 'sepia', 'ambre', 'nuit', 'contraste'];
+const THEMES = ['creme', 'sepia', 'ambre', 'nuit', 'contraste', 'perso'];
 const ACCENTS = ['var(--yellow)', 'var(--blue)', 'var(--green)', 'var(--red)', 'var(--pink)', 'var(--purple)'];
 const HL_COLORS = ['yellow', 'green', 'blue', 'pink'];
 const FONTS = {
@@ -68,7 +68,16 @@ const DEFAULT_SETTINGS = {
   dailyGoalMin: 20,  // objectif de lecture quotidien en minutes (0 = off)
   pomodoroFocus: 25, // durée d'une session de lecture (minutes)
   pomodoroBreak: 5,  // durée d'une pause (minutes)
+  pageAnim: 'slide', // 'slide' | 'fade' | 'curl' | 'none'
+  custom: { bg: '#EAE4D3', paper: '#F7F1E1', ink: '#2A2620' }, // thème sur mesure
+  customFonts: [],   // [{ name, data(base64) }] polices importées
 };
+
+// #rrggbb → "r, g, b"
+function hexToRgb(hex) {
+  const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex || '');
+  return m ? `${parseInt(m[1], 16)}, ${parseInt(m[2], 16)}, ${parseInt(m[3], 16)}` : '0, 0, 0';
+}
 
 let store = { version: 2, settings: { ...DEFAULT_SETTINGS }, books: [], stats: { daily: {} } };
 // { book, paras, page, total, totalCols, cols, colW, lastCol, toc }

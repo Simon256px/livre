@@ -104,6 +104,7 @@ body {
 .dot[data-theme="ambre"] { background: #43300F; }
 .dot[data-theme="nuit"]  { background: #0D1320; }
 .dot[data-theme="contraste"] { background: #fff; background-image: linear-gradient(135deg, #fff 50%, #000 50%); }
+.dot[data-theme="perso"] { background-image: conic-gradient(var(--red), var(--yellow), var(--green), var(--blue), var(--purple), var(--red)); }
 
 /* ─────────── Bibliothèque ─────────── */
 .screen { height: 100vh; }
@@ -557,6 +558,31 @@ body.fullscreen.peek .topbar { transform: translateY(0); opacity: 1; }
   border-radius: 10px;
 }
 
+/* Balayage « page tournée » */
+#pageTurn {
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 0;
+  width: 55%;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 5;
+  background: linear-gradient(90deg,
+    transparent 0%, rgba(0,0,0,.015) 35%, rgba(0,0,0,.16) 50%, rgba(0,0,0,.015) 65%, transparent 100%);
+}
+#pageTurn.next { animation: turnNext .32s ease; }
+#pageTurn.prev { animation: turnPrev .32s ease; }
+@keyframes turnNext {
+  0%   { transform: translateX(-140%); opacity: 0; }
+  25%  { opacity: 1; }
+  100% { transform: translateX(240%); opacity: 0; }
+}
+@keyframes turnPrev {
+  0%   { transform: translateX(240%); opacity: 0; }
+  25%  { opacity: 1; }
+  100% { transform: translateX(-140%); opacity: 0; }
+}
+
 /* Reliure centrale en double page */
 .page-frame.cols2 #bookViewport::after {
   content: '';
@@ -743,6 +769,32 @@ body.fullscreen.peek .topbar { transform: translateY(0); opacity: 1; }
 }
 .setting input[type="range"] { width: 100%; accent-color: var(--blue); }
 .setting input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--blue); }
+.setting > select + .pill.icon.small { margin-top: 8px; }
+.color-row { display: flex; gap: 10px; }
+.color-pick {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+}
+.color-pick input[type="color"] {
+  width: 100%;
+  height: 34px;
+  padding: 0;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  background: var(--bg);
+  cursor: pointer;
+}
+.color-pick input[type="color"]::-webkit-color-swatch-wrapper { padding: 3px; }
+.color-pick input[type="color"]::-webkit-color-swatch { border: none; border-radius: 6px; }
 .toggle-row { display: flex; justify-content: space-between; align-items: center; }
 .toggle-row label { margin: 0; }
 

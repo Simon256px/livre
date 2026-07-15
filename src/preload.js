@@ -2,6 +2,7 @@ const { contextBridge, ipcRenderer, webUtils } = require('electron');
 
 contextBridge.exposeInMainWorld('livre', {
   pickBooks: () => ipcRenderer.invoke('pick-books'),
+  pickFont: () => ipcRenderer.invoke('pick-font'),
   readFile: (filePath) => ipcRenderer.invoke('read-file', filePath),
   loadStore: () => ipcRenderer.invoke('load-store'),
   saveStore: (store) => ipcRenderer.invoke('save-store', store),

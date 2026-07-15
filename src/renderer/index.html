@@ -106,7 +106,7 @@
       <button class="nav-btn" id="prevBtn" title="Page précédente">‹</button>
       <div class="page-frame" id="pageFrame">
         <div class="running-head" id="runningHead"></div>
-        <div id="bookViewport"><div id="bookContent"></div></div>
+        <div id="bookViewport"><div id="bookContent"></div><div id="pageTurn"></div></div>
         <div class="page-foot">
           <span id="pageInfo"></span>
           <div class="progress"><div class="fill" id="readFill"></div></div>
@@ -154,14 +154,18 @@
       <div class="setting">
         <label for="fontSelect">Police</label>
         <select id="fontSelect">
-          <option value="literata">Literata (lecture)</option>
-          <option value="atkinson">Atkinson Hyperlegible</option>
-          <option value="plex">IBM Plex Serif</option>
-          <option value="opendyslexic">OpenDyslexic</option>
-          <option value="georgia">Georgia</option>
-          <option value="palatino">Palatino</option>
-          <option value="segoe">Segoe UI (sans-serif)</option>
+          <optgroup label="Embarquées" id="fontBuiltin">
+            <option value="literata">Literata (lecture)</option>
+            <option value="atkinson">Atkinson Hyperlegible</option>
+            <option value="plex">IBM Plex Serif</option>
+            <option value="opendyslexic">OpenDyslexic</option>
+            <option value="georgia">Georgia</option>
+            <option value="palatino">Palatino</option>
+            <option value="segoe">Segoe UI (sans-serif)</option>
+          </optgroup>
+          <optgroup label="Importées" id="fontCustom"></optgroup>
         </select>
+        <button class="pill icon small" id="fontImportBtn" title="Importer une police (.ttf, .otf, .woff)">＋</button>
       </div>
 
       <div class="setting">
@@ -178,6 +182,15 @@
           <option value="auto">Auto (selon la fenêtre)</option>
           <option value="1">Une page</option>
           <option value="2">Double page</option>
+        </select>
+      </div>
+
+      <div class="setting">
+        <label for="animSelect">Changement de page</label>
+        <select id="animSelect">
+          <option value="slide">Glissement</option>
+          <option value="curl">Page tournée</option>
+          <option value="none">Aucune</option>
         </select>
       </div>
 
@@ -209,6 +222,15 @@
       <div class="setting toggle-row">
         <label for="pageSoundChk">Son de tournage de page</label>
         <input type="checkbox" id="pageSoundChk">
+      </div>
+
+      <div class="setting">
+        <label>Thème sur mesure</label>
+        <div class="color-row">
+          <label class="color-pick" title="Fond">Fond<input type="color" id="colBg"></label>
+          <label class="color-pick" title="Page">Page<input type="color" id="colPaper"></label>
+          <label class="color-pick" title="Texte">Texte<input type="color" id="colInk"></label>
+        </div>
       </div>
 
       <hr class="rule dotted">
