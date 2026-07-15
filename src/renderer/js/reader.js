@@ -58,6 +58,8 @@ function closeReader() {
   hideHlToolbar();
   hideAnnPopover();
   hideDictPopover();
+  sketchClose(false);
+  hideSketchView();
   flushStore();
   switchScreen('library');
   renderLibrary();
@@ -110,6 +112,7 @@ function renderContent() {
   c.style.fontSize = s.fontSize + 'px';
   c.style.lineHeight = s.lineHeight;
   c.style.textAlign = s.justify ? 'justify' : 'left';
+  c.classList.toggle('design', !!s.bookDesign);
   c.innerHTML = current.paras.map((p, i) => {
     if (p.type === 'h') return `<h2 data-i="${i}">${esc(p.text)}</h2>`;
     if (p.type === 'img') return `<figure data-i="${i}"><img src="${p.src}" alt=""></figure>`;

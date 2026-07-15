@@ -203,6 +203,39 @@ ipcMain.handle('toggle-fullscreen', () => {
   return win.isFullScreen();
 });
 
+ipcMain.handle('get-version', () => app.getVersion());
+
+/* ---------- Mise à jour intégrée (GitHub Releases) ----------
+   Uniquement à la demande de l'utilisateur : aucune vérification
+   automatique au démarrage (principe offline). */
+let autoUpdater = null;
+try { ({ autoUpdater } = require('electron-updater')); } catch {}
+
+ipcMain.handle('check-updates', async () => {
+  if (!app.isPackaged) return { status: 'dev' };
+  if (!autoUpdater) return { status: 'error', message: 'module de mise à jour absent' };
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+  return await new Promise((resolve) => {
+    autoUpdater.removeAllListeners();
+    autoUpdater.on('update-available', (i) =>
+      win.webContents.send('update-state', { state: 'downloading', version: i.version }));
+    autoUpdater.on('download-progress', (p) =>
+      win.webContents.send('update-state', { state: 'progress', percent: Math.round(p.percent) }));
+    autoUpdater.on('update-downloaded', (i) => {
+      win.webContents.send('update-state', { state: 'ready', version: i.version });
+      resolve({ status: 'ready', version: i.version });
+    });
+    autoUpdater.on('update-not-available', () => resolve({ status: 'uptodate' }));
+    autoUpdater.on('error', (e) => resolve({ status: 'error', message: String((e && e.message) || e) }));
+    autoUpdater.checkForUpdates().catch((e) => resolve({ status: 'error', message: String(e) }));
+  });
+});
+
+ipcMain.handle('install-update', () => {
+  if (autoUpdater) autoUpdater.quitAndInstall();
+});
+
 // Ouverture d'un lien externe (dictionnaire) : restreint au Wiktionnaire fr
 ipcMain.handle('open-external', (_e, url) => {
   try {

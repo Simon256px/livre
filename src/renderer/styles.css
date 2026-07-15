@@ -546,6 +546,42 @@ body.fullscreen.peek .topbar { transform: translateY(0); opacity: 1; }
   break-inside: avoid;
 }
 #bookContent b { font-weight: 700; }
+
+/* ── Mise en page d'auteur : chapitres composés comme dans un vrai livre ── */
+/* Chaque chapitre ouvre une nouvelle page, titre centré et orné */
+#bookContent.design h2 {
+  break-before: column;
+  text-align: center;
+  font-size: 1.7em;
+  margin: 2.6em 0 1.4em;
+}
+#bookContent.design h2:first-child { break-before: auto; margin-top: 1em; }
+#bookContent.design h2::before {
+  content: '✦';
+  display: block;
+  font-size: .5em;
+  color: var(--red);
+  margin-bottom: .8em;
+  letter-spacing: .4em;
+}
+#bookContent.design h2::after {
+  content: '';
+  display: block;
+  width: 72px;
+  border-top: 2px solid var(--ink);
+  margin: .7em auto 0;
+}
+/* Lettrine sur le premier paragraphe du chapitre */
+#bookContent.design h2 + p::first-letter {
+  -webkit-initial-letter: 3;
+  initial-letter: 3;
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--red);
+  padding-right: .1em;
+}
+/* Respiration en fin de chapitre : le paragraphe précédant un titre */
+#bookContent.design p:has(+ h2) { margin-bottom: 2em; }
 #bookContent figure {
   margin: 1em 0;
   break-inside: avoid;
@@ -1008,18 +1044,39 @@ body.fullscreen.peek .topbar { transform: translateY(0); opacity: 1; }
   100% { transform: rotateX(0);      opacity: 1; }
 }
 
-/* Barre de progression cliquable (scrubber) */
+/* Barre de progression cliquable et glissable (scrubber) */
 #rsvpBar {
   position: relative;
-  width: 520px;
-  max-width: 80vw;
-  height: 14px;
+  width: 560px;
+  max-width: 84vw;
+  height: 22px;
   border: 2px solid var(--ink);
   border-radius: 99px;
   background: var(--paper);
   box-shadow: 3px 3px 0 var(--ink);
   cursor: pointer;
+  touch-action: none; /* glisser au doigt/stylet sans scroller */
 }
+/* Bulle d'aperçu : montre le mot visé pendant le survol / glissement */
+#rsvpBubble {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  transform: translateX(-50%);
+  padding: 6px 14px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--yellow);
+  color: #1D1A14;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+  white-space: nowrap;
+  box-shadow: 2px 2px 0 var(--ink);
+  pointer-events: none;
+  display: none;
+}
+#rsvpBubble .pct { opacity: .6; font-size: 11px; margin-left: 6px; }
+#rsvpBar:hover #rsvpBubble, #rsvpBar.dragging #rsvpBubble { display: block; }
 #rsvpBar .fill {
   height: 100%;
   width: 0;
@@ -1031,14 +1088,16 @@ body.fullscreen.peek .topbar { transform: translateY(0); opacity: 1; }
   position: absolute;
   top: 50%;
   left: 0;
-  width: 20px; height: 20px;
+  width: 28px; height: 28px;
   transform: translate(-50%, -50%);
   border: 2px solid var(--ink);
   border-radius: 50%;
   background: var(--yellow);
+  box-shadow: 2px 2px 0 var(--ink);
   transition: left .12s linear;
   pointer-events: none;
 }
+#rsvpBar.dragging .knob, #rsvpBar.dragging .fill { transition: none; }
 /* Repères de chapitres sur la barre */
 #rsvpTicks { position: absolute; inset: 0; pointer-events: none; }
 #rsvpTicks .tick {
@@ -1053,6 +1112,96 @@ body.fullscreen.peek .topbar { transform: translateY(0); opacity: 1; }
 .rsvp-controls label { display: flex; align-items: center; gap: 10px; text-transform: uppercase; }
 .rsvp-controls input[type="range"] { width: 180px; accent-color: var(--blue); }
 .rsvp-hint { margin: 0; }
+
+/* ─────────── Page Options (menu de jeu) ─────────── */
+#optionsScreen {
+  position: fixed; inset: 0;
+  z-index: 78;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  overflow: hidden;
+}
+.opt-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 36px 48px 10px;
+}
+.opt-head h1 { font-family: var(--font-display); font-weight: 800; font-size: 38px; margin: 0; }
+.opt-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 28px;
+  padding: 18px 48px 40px;
+}
+#optNav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 230px;
+  flex: none;
+}
+.pill.opt-tab {
+  justify-content: flex-start;
+  height: 46px;
+  font-size: 13px;
+  text-transform: none;
+  letter-spacing: .02em;
+}
+.pill.opt-tab.active {
+  background: var(--ink);
+  color: var(--bg);
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+.opt-panes {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 26px 30px;
+  border: 2px solid var(--ink);
+  border-radius: 20px;
+  background: var(--paper);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.opt-pane { max-width: 560px; }
+.theme-dots.big .dot { width: 34px; height: 34px; }
+.opt-version { font-family: var(--font-display); font-weight: 800; font-size: 22px; margin: 0; }
+.danger-zone { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+
+/* Grille des succès */
+#achGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 14px;
+}
+.ach {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+  background: var(--bg);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.ach .ico {
+  width: 44px; height: 44px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--yellow);
+}
+.ach h4 { margin: 0; font-family: var(--font-display); font-size: 13px; }
+.ach p { margin: 2px 0 0; font-size: 11px; color: var(--muted); line-height: 1.3; }
+.ach.locked { opacity: .55; }
+.ach.locked .ico { background: var(--paper); filter: grayscale(1); }
 
 /* ─────────── Chargement & divers ─────────── */
 #loader {
@@ -1092,6 +1241,72 @@ body.fullscreen.peek .topbar { transform: translateY(0); opacity: 1; }
   0%, 100% { transform: translateY(0) rotate(-3deg); }
   50%      { transform: translateY(-14px) rotate(3deg); }
 }
+
+/* ─────────── Dessin au stylet ─────────── */
+#sketchLayer {
+  position: fixed;
+  z-index: 55;
+  border-radius: 20px;
+  overflow: hidden;
+  cursor: crosshair;
+  background: rgba(0, 0, 0, .02);
+  outline: 3px dashed var(--blue);
+  touch-action: none; /* stylet/doigt : pas de scroll pendant le dessin */
+}
+#sketchCanvas { display: block; }
+#sketchTools {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--paper);
+  box-shadow: 3px 3px 0 var(--ink);
+  cursor: default;
+}
+#sketchTools .pen[data-pen="ink"] { background: #1D1A14; }
+#sketchTools .pen[data-pen="red"] { background: var(--red); }
+#sketchTools .pen[data-pen="blue"] { background: var(--blue); }
+#sketchTools .pen[data-pen="green"] { background: var(--green); }
+#sketchTools .pen.sel { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink); }
+
+#sketchView {
+  position: fixed; inset: 0;
+  z-index: 85;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--dim);
+  cursor: zoom-out;
+}
+#sketchView img {
+  max-width: 86vw;
+  max-height: 86vh;
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  background: var(--paper);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+/* Croquis dans le panneau Notes */
+#sketchList { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+#sketchList li {
+  position: relative;
+  width: 84px; height: 62px;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--bg);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+#sketchList img { width: 100%; height: 100%; object-fit: cover; }
+#sketchList .item-del { top: 0; right: 0; background: var(--paper); border-radius: 0 0 0 8px; }
 
 #pomodoroBadge {
   position: fixed;

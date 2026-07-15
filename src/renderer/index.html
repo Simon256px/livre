@@ -13,6 +13,8 @@
   <link rel="stylesheet" href="../../node_modules/@fontsource/ibm-plex-serif/700.css">
   <link rel="stylesheet" href="../../node_modules/@fontsource/opendyslexic/400.css">
   <link rel="stylesheet" href="../../node_modules/@fontsource/opendyslexic/700.css">
+  <link rel="stylesheet" href="../../node_modules/@fontsource/manrope/400.css">
+  <link rel="stylesheet" href="../../node_modules/@fontsource/manrope/700.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body data-theme="creme">
@@ -30,6 +32,7 @@
         <div class="theme-dots" id="libDots"></div>
         <button class="pill icon" id="exportLibBtn" title="Exporter la bibliothèque (sauvegarde)">⭳</button>
         <button class="pill icon" id="importLibBtn" title="Importer une bibliothèque">⭱</button>
+        <button class="pill icon" id="libOptionsBtn" title="Options">⚙</button>
         <button class="pill primary" id="addBtn">＋ Ajouter</button>
       </div>
     </header>
@@ -85,6 +88,7 @@
       <div class="theme-dots" id="readerDots"></div>
       <button class="pill icon" id="searchBtn" title="Rechercher (Ctrl+F)">⌕</button>
       <button class="pill icon" id="bookmarkBtn" title="Poser un signet">🔖</button>
+      <button class="pill icon" id="sketchBtn" title="Dessiner (stylet)">✏️</button>
       <button class="pill icon" id="notesBtn" title="Notes et surlignages">🗒</button>
       <button class="pill icon" id="pomodoroBtn" title="Minuteur Pomodoro">🍅</button>
       <button class="pill icon" id="rsvpBtn" title="Lecture rapide (RSVP)">⚡</button>
@@ -142,141 +146,191 @@
       <ul id="bookmarkList"></ul>
       <h3 class="drawer-sub">Surlignages</h3>
       <ul id="annList"></ul>
+      <h3 class="drawer-sub">Croquis</h3>
+      <ul id="sketchList"></ul>
     </aside>
 
-    <!-- Réglages (droite) -->
-    <aside id="settingsDrawer" class="drawer">
-      <div class="drawer-head">
-        <h2>✦ Réglages</h2>
-        <button class="pill icon" id="closeDrawerBtn">✕</button>
-      </div>
-
-      <div class="setting">
-        <label for="fontSelect">Police</label>
-        <select id="fontSelect">
-          <optgroup label="Embarquées" id="fontBuiltin">
-            <option value="literata">Literata (lecture)</option>
-            <option value="atkinson">Atkinson Hyperlegible</option>
-            <option value="plex">IBM Plex Serif</option>
-            <option value="opendyslexic">OpenDyslexic</option>
-            <option value="georgia">Georgia</option>
-            <option value="palatino">Palatino</option>
-            <option value="segoe">Segoe UI (sans-serif)</option>
-          </optgroup>
-          <optgroup label="Importées" id="fontCustom"></optgroup>
-        </select>
-        <button class="pill icon small" id="fontImportBtn" title="Importer une police (.ttf, .otf, .woff)">＋</button>
-      </div>
-
-      <div class="setting">
-        <label for="flowSelect">Mode de lecture</label>
-        <select id="flowSelect">
-          <option value="pages">Pages (comme un livre)</option>
-          <option value="scroll">Défilement continu</option>
-        </select>
-      </div>
-
-      <div class="setting">
-        <label for="spreadSelect">Pages affichées</label>
-        <select id="spreadSelect">
-          <option value="auto">Auto (selon la fenêtre)</option>
-          <option value="1">Une page</option>
-          <option value="2">Double page</option>
-        </select>
-      </div>
-
-      <div class="setting">
-        <label for="animSelect">Changement de page</label>
-        <select id="animSelect">
-          <option value="slide">Glissement</option>
-          <option value="curl">Page tournée</option>
-          <option value="none">Aucune</option>
-        </select>
-      </div>
-
-      <div class="setting">
-        <label for="sizeRange">Taille du texte <span class="val" id="sizeVal"></span></label>
-        <input type="range" id="sizeRange" min="15" max="26" step="1">
-      </div>
-
-      <div class="setting">
-        <label for="lhRange">Interligne <span class="val" id="lhVal"></span></label>
-        <input type="range" id="lhRange" min="1.4" max="2.2" step="0.05">
-      </div>
-
-      <div class="setting">
-        <label for="widthRange">Largeur de page <span class="val" id="widthVal"></span></label>
-        <input type="range" id="widthRange" min="440" max="760" step="20">
-      </div>
-
-      <div class="setting">
-        <label for="marginRange">Marges <span class="val" id="marginVal"></span></label>
-        <input type="range" id="marginRange" min="24" max="90" step="2">
-      </div>
-
-      <div class="setting toggle-row">
-        <label for="justifyChk">Texte justifié</label>
-        <input type="checkbox" id="justifyChk">
-      </div>
-
-      <div class="setting toggle-row">
-        <label for="pageSoundChk">Son de tournage de page</label>
-        <input type="checkbox" id="pageSoundChk">
-      </div>
-
-      <div class="setting">
-        <label>Thème sur mesure</label>
-        <div class="color-row">
-          <label class="color-pick" title="Fond">Fond<input type="color" id="colBg"></label>
-          <label class="color-pick" title="Page">Page<input type="color" id="colPaper"></label>
-          <label class="color-pick" title="Texte">Texte<input type="color" id="colInk"></label>
-        </div>
-      </div>
-
-      <hr class="rule dotted">
-
-      <div class="setting toggle-row">
-        <label for="bionicChk">Bionic reading</label>
-        <input type="checkbox" id="bionicChk">
-      </div>
-
-      <div class="setting">
-        <label for="intensityRange">Intensité <span class="val" id="intensityVal"></span></label>
-        <input type="range" id="intensityRange" min="0.2" max="0.7" step="0.05">
-      </div>
-
-      <div class="setting toggle-row">
-        <label for="focusChk">Mode focus (règle)</label>
-        <input type="checkbox" id="focusChk">
-      </div>
-
-      <hr class="rule dotted">
-
-      <div class="setting toggle-row">
-        <label for="dictChk">Dictionnaire en ligne</label>
-        <input type="checkbox" id="dictChk">
-      </div>
-      <p class="setting-note">Double-clique un mot pour sa définition (Wiktionnaire, connexion requise).</p>
-
-      <hr class="rule dotted">
-      <h3 class="drawer-sub">Concentration &amp; objectifs</h3>
-
-      <div class="setting">
-        <label for="goalRange">Objectif quotidien <span class="val" id="goalVal"></span></label>
-        <input type="range" id="goalRange" min="0" max="120" step="5">
-      </div>
-
-      <div class="setting">
-        <label for="pomoFocusRange">Pomodoro — lecture <span class="val" id="pomoFocusVal"></span></label>
-        <input type="range" id="pomoFocusRange" min="10" max="60" step="5">
-      </div>
-
-      <div class="setting">
-        <label for="pomoBreakRange">Pomodoro — pause <span class="val" id="pomoBreakVal"></span></label>
-        <input type="range" id="pomoBreakRange" min="3" max="20" step="1">
-      </div>
-    </aside>
   </section>
+
+  <!-- ═══════════ Options (plein écran, façon menu de jeu) ═══════════ -->
+  <div id="optionsScreen" class="hidden">
+    <header class="opt-head">
+      <div class="brand"><span class="num">.02</span><h1><span class="star">✦</span> Options</h1></div>
+      <button class="pill icon" id="optCloseBtn" title="Fermer (Échap)">✕</button>
+    </header>
+    <div class="opt-body">
+      <nav id="optNav">
+        <button class="pill opt-tab active" data-pane="lecture">📖 Lecture</button>
+        <button class="pill opt-tab" data-pane="apparence">🎨 Apparence</button>
+        <button class="pill opt-tab" data-pane="aides">⚡ Aides</button>
+        <button class="pill opt-tab" data-pane="concentration">🎯 Concentration</button>
+        <button class="pill opt-tab" data-pane="succes">🏆 Succès</button>
+        <button class="pill opt-tab" data-pane="donnees">💾 Données</button>
+        <button class="pill opt-tab" data-pane="maj">🔄 Mise à jour</button>
+      </nav>
+      <div class="opt-panes">
+
+        <section class="opt-pane" data-pane="lecture">
+          <div class="setting">
+            <label for="fontSelect">Police</label>
+            <select id="fontSelect">
+              <optgroup label="Embarquées" id="fontBuiltin">
+                <option value="literata">Literata (lecture)</option>
+                <option value="atkinson">Atkinson Hyperlegible</option>
+                <option value="plex">IBM Plex Serif</option>
+                <option value="manrope">Manrope</option>
+                <option value="opendyslexic">OpenDyslexic</option>
+                <option value="georgia">Georgia</option>
+                <option value="palatino">Palatino</option>
+                <option value="segoe">Segoe UI (sans-serif)</option>
+              </optgroup>
+              <optgroup label="Importées" id="fontCustom"></optgroup>
+            </select>
+            <button class="pill icon small" id="fontImportBtn" title="Importer une police (.ttf, .otf, .woff)">＋</button>
+          </div>
+          <div class="setting">
+            <label for="flowSelect">Mode de lecture</label>
+            <select id="flowSelect">
+              <option value="pages">Pages (comme un livre)</option>
+              <option value="scroll">Défilement continu</option>
+            </select>
+          </div>
+          <div class="setting">
+            <label for="spreadSelect">Pages affichées</label>
+            <select id="spreadSelect">
+              <option value="auto">Auto (selon la fenêtre)</option>
+              <option value="1">Une page</option>
+              <option value="2">Double page</option>
+            </select>
+          </div>
+          <div class="setting">
+            <label for="sizeRange">Taille du texte <span class="val" id="sizeVal"></span></label>
+            <input type="range" id="sizeRange" min="15" max="26" step="1">
+          </div>
+          <div class="setting">
+            <label for="lhRange">Interligne <span class="val" id="lhVal"></span></label>
+            <input type="range" id="lhRange" min="1.4" max="2.2" step="0.05">
+          </div>
+          <div class="setting">
+            <label for="widthRange">Largeur de page <span class="val" id="widthVal"></span></label>
+            <input type="range" id="widthRange" min="440" max="760" step="20">
+          </div>
+          <div class="setting">
+            <label for="marginRange">Marges <span class="val" id="marginVal"></span></label>
+            <input type="range" id="marginRange" min="24" max="90" step="2">
+          </div>
+          <div class="setting toggle-row">
+            <label for="justifyChk">Texte justifié</label>
+            <input type="checkbox" id="justifyChk">
+          </div>
+        </section>
+
+        <section class="opt-pane hidden" data-pane="apparence">
+          <div class="setting">
+            <label>Thème</label>
+            <div class="theme-dots big" id="optDots"></div>
+          </div>
+          <div class="setting">
+            <label>Thème sur mesure</label>
+            <div class="color-row">
+              <label class="color-pick" title="Fond">Fond<input type="color" id="colBg"></label>
+              <label class="color-pick" title="Page">Page<input type="color" id="colPaper"></label>
+              <label class="color-pick" title="Texte">Texte<input type="color" id="colInk"></label>
+            </div>
+          </div>
+          <div class="setting toggle-row">
+            <label for="bookDesignChk">Mise en page d’auteur (chapitres, lettrines)</label>
+            <input type="checkbox" id="bookDesignChk">
+          </div>
+          <div class="setting">
+            <label for="animSelect">Changement de page</label>
+            <select id="animSelect">
+              <option value="slide">Glissement</option>
+              <option value="curl">Page tournée</option>
+              <option value="none">Aucune</option>
+            </select>
+          </div>
+          <div class="setting toggle-row">
+            <label for="pageSoundChk">Son de tournage de page</label>
+            <input type="checkbox" id="pageSoundChk">
+          </div>
+        </section>
+
+        <section class="opt-pane hidden" data-pane="aides">
+          <div class="setting toggle-row">
+            <label for="bionicChk">Bionic reading</label>
+            <input type="checkbox" id="bionicChk">
+          </div>
+          <div class="setting">
+            <label for="intensityRange">Intensité <span class="val" id="intensityVal"></span></label>
+            <input type="range" id="intensityRange" min="0.2" max="0.7" step="0.05">
+          </div>
+          <div class="setting toggle-row">
+            <label for="focusChk">Mode focus (règle)</label>
+            <input type="checkbox" id="focusChk">
+          </div>
+          <div class="setting toggle-row">
+            <label for="dictChk">Dictionnaire en ligne</label>
+            <input type="checkbox" id="dictChk">
+          </div>
+          <p class="setting-note">Double-clique un mot pour sa définition (Wiktionnaire, connexion requise).</p>
+        </section>
+
+        <section class="opt-pane hidden" data-pane="concentration">
+          <div class="setting">
+            <label for="goalRange">Objectif quotidien <span class="val" id="goalVal"></span></label>
+            <input type="range" id="goalRange" min="0" max="120" step="5">
+          </div>
+          <div class="setting">
+            <label for="pomoFocusRange">Pomodoro — lecture <span class="val" id="pomoFocusVal"></span></label>
+            <input type="range" id="pomoFocusRange" min="10" max="60" step="5">
+          </div>
+          <div class="setting">
+            <label for="pomoBreakRange">Pomodoro — pause <span class="val" id="pomoBreakVal"></span></label>
+            <input type="range" id="pomoBreakRange" min="3" max="20" step="1">
+          </div>
+        </section>
+
+        <section class="opt-pane hidden" data-pane="succes">
+          <p class="setting-note" id="achSummary"></p>
+          <div id="achGrid"></div>
+        </section>
+
+        <section class="opt-pane hidden" data-pane="donnees">
+          <div class="setting">
+            <label>Sauvegarde</label>
+            <div class="export-row">
+              <button class="pill" id="optExportLib">⭳ Exporter la bibliothèque</button>
+              <button class="pill" id="optImportLib">⭱ Importer</button>
+            </div>
+          </div>
+          <div class="setting">
+            <label>Remise à zéro</label>
+            <div class="danger-zone">
+              <button class="pill" id="resetStatsBtn">↺ Réinitialiser les statistiques</button>
+              <button class="pill" id="resetSettingsBtn">↺ Réinitialiser les réglages</button>
+              <button class="pill danger" id="resetAllBtn">🗑 Tout effacer (bibliothèque comprise)</button>
+            </div>
+          </div>
+          <p class="setting-note">Les fichiers PDF/EPUB sur ton disque ne sont jamais touchés.</p>
+        </section>
+
+        <section class="opt-pane hidden" data-pane="maj">
+          <div class="setting">
+            <label>Version installée</label>
+            <p class="opt-version" id="appVersion">—</p>
+          </div>
+          <div class="setting">
+            <label>Mise à jour</label>
+            <button class="pill primary" id="checkUpdateBtn">🔄 Vérifier les mises à jour</button>
+            <button class="pill hidden" id="installUpdateBtn">⤓ Redémarrer et installer</button>
+            <p class="setting-note" id="updateStatus">La vérification contacte GitHub (seule fonction réseau avec le dictionnaire). Ta bibliothèque, tes notes et tes réglages sont conservés lors d’une mise à jour.</p>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
 
   <!-- Barre de surlignage flottante -->
   <div id="hlToolbar" class="hidden">
@@ -307,10 +361,11 @@
     <div id="rsvpChapter" class="mono"></div>
     <div id="rsvpContext"></div>
     <div id="rsvpWord">prêt ?</div>
-    <div id="rsvpBar" title="Clique pour reprendre où tu veux">
+    <div id="rsvpBar" title="Clique ou fais glisser pour reprendre où tu veux">
       <div class="fill" id="rsvpFill"></div>
       <div id="rsvpTicks"></div>
       <div class="knob" id="rsvpKnob"></div>
+      <div id="rsvpBubble"></div>
     </div>
     <div class="rsvp-controls">
       <button class="pill icon" id="rsvpBack" title="Mot précédent">‹</button>
@@ -338,6 +393,25 @@
     <button class="pill" id="loaderCancel">✕ Interrompre</button>
   </div>
 
+  <!-- Calque de dessin au stylet -->
+  <div id="sketchLayer" class="hidden">
+    <canvas id="sketchCanvas"></canvas>
+    <div id="sketchTools">
+      <button class="hl-dot pen" data-pen="ink" title="Encre"></button>
+      <button class="hl-dot pen" data-pen="red" title="Rouge"></button>
+      <button class="hl-dot pen" data-pen="blue" title="Bleu"></button>
+      <button class="hl-dot pen" data-pen="green" title="Vert"></button>
+      <button class="pill icon small" id="sketchClearBtn" title="Tout effacer">🧽</button>
+      <button class="pill icon small" id="sketchSaveBtn" title="Enregistrer le croquis">✓</button>
+      <button class="pill icon small" id="sketchCancelBtn" title="Annuler">✕</button>
+    </div>
+  </div>
+
+  <!-- Visionneuse de croquis -->
+  <div id="sketchView" class="hidden">
+    <img id="sketchViewImg" alt="Croquis">
+  </div>
+
   <!-- Badge Pomodoro -->
   <div id="pomodoroBadge" class="hidden">
     🍅 <span id="pomoPhase"></span> <span id="pomoTime" class="mono"></span>
@@ -357,6 +431,8 @@
   <script src="js/dictionary.js"></script>
   <script src="js/media.js"></script>
   <script src="js/focus.js"></script>
+  <script src="js/sketch.js"></script>
+  <script src="js/achievements.js"></script>
   <script src="js/library.js"></script>
   <script src="js/boot.js"></script>
 </body>

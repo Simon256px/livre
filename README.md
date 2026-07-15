@@ -29,13 +29,18 @@ Livre est une application de bureau (Electron) qui prend vos PDF et EPUB et les 
 
 ### Annotations
 - **Surlignage 4 couleurs** (sélectionner du texte → palette flottante), notes attachées, signets
+- **Dessin au stylet** : croquis directement sur la page (pression gérée), galerie dans le panneau Notes
 - **Recherche** dans les notes ; **export Markdown et PDF**, regroupés par chapitre
 
 ### Personnalisation & accessibilité
+- **Page Options plein écran** façon menu de jeu, avec remise à zéro (stats, réglages, tout)
+- **Mise en page d'auteur** : chapitres sur nouvelle page, titres ornés, lettrines
 - 5 thèmes dont un **contraste élevé**, plus un **thème sur mesure** (couleurs fond/page/texte)
-- **Import de polices** personnalisées (.ttf/.otf/.woff)
+- **Import de polices** personnalisées (.ttf/.otf/.woff), 8 polices embarquées dont Manrope
 - Marges réglables, **animations de page** (glissement / page tournée / aucune), **sons de tournage**
 - Police OpenDyslexic, navigation clavier
+- **Succès à débloquer** 🏆 (livres, mots, heures, streaks…)
+- **Mise à jour intégrée** : bouton « Vérifier les mises à jour » dans Options (bibliothèque et réglages conservés)
 
 ### Bibliothèque & statistiques
 - Couvertures extraites automatiquement, progression, recherche par titre/auteur/tag

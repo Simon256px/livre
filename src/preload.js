@@ -14,6 +14,10 @@ contextBridge.exposeInMainWorld('livre', {
   exportPdf: (opts) => ipcRenderer.invoke('export-pdf', opts),
   toggleFullscreen: () => ipcRenderer.invoke('toggle-fullscreen'),
   openExternal: (url) => ipcRenderer.invoke('open-external', url),
+  getVersion: () => ipcRenderer.invoke('get-version'),
+  checkUpdates: () => ipcRenderer.invoke('check-updates'),
+  installUpdate: () => ipcRenderer.invoke('install-update'),
+  onUpdateState: (cb) => ipcRenderer.on('update-state', (_e, s) => cb(s)),
   onFullscreen: (cb) => ipcRenderer.on('fullscreen', (_e, on) => cb(on)),
   onOpenFiles: (cb) => ipcRenderer.on('open-files', (_e, paths) => cb(paths)),
   pathForFile: (file) => {

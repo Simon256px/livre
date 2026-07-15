@@ -17,7 +17,8 @@ Les cases cochées sont déjà dans la version actuelle.
 - ~~v0.6 — Confort : objectif quotidien, Pomodoro, favoris/tags/étagères~~ ✅ livré
 - ~~v0.7 — Export PDF, recherche notes, import/export biblio, contraste, marges, sons~~ ✅ livré
 - ~~v0.8 — Personnalisation : thème/couleurs sur mesure, import de polices, page tournée~~ ✅ livré
-- **v0.9 — Confort avancé** : lecture verticale/horizontale, affichage liste/étagère,
+- ~~v0.9 — Patch gros PDF, page Options, succès, mise en page d'auteur, stylet, MàJ intégrée~~ ✅ livré
+- **v1.0 — Confort avancé** : lecture verticale/horizontale, affichage liste/étagère,
   collections nommées, tri intelligent, pages lues par jour
 - **Plus tard** : traduction/Wikipédia (opt-in), fonctions IA (opt-in),
   voix neurales locales, sync automatique multi-appareils, lecteurs d'écran
@@ -42,7 +43,7 @@ Les cases cochées sont déjà dans la version actuelle.
 - [x] Surlignage de plusieurs couleurs (sélection → palette flottante)
 - [x] Notes attachées à un passage
 - [x] Signets (bookmarks)
-- [ ] Dessin au stylet
+- [x] Dessin au stylet (croquis sur la page, pression gérée, galerie dans Notes)
 - [x] Export des annotations en Markdown
 - [x] Export des annotations en PDF (PDF de notes mis en page)
 - [ ] Synchronisation automatique des annotations entre appareils
@@ -79,14 +80,19 @@ Les cases cochées sont déjà dans la version actuelle.
 - [ ] Pages lues par jour
 - [x] Vitesse moyenne (mots/minute, sur 30 jours)
 - [x] Calendrier de lecture (streak)
+- [x] Succès à débloquer (14 : livres, mots, heures, streak, objectif…)
 - [ ] Historique de progression détaillé
 
 ## 🎨 Personnalisation
 
 - [x] 4 thèmes (crème, sépia, ambre, nuit) avec grain papier
 - [x] Taille, interligne, largeur de page, justification réglables
-- [x] 7 polices (Literata, Atkinson Hyperlegible, IBM Plex Serif,
+- [x] 8 polices (Literata, Atkinson Hyperlegible, IBM Plex Serif, Manrope,
       OpenDyslexic, Georgia, Palatino, Segoe UI)
+- [x] Mise en page d'auteur : chapitres sur nouvelle page, titres ornés,
+      lettrines (activable)
+- [x] Page Options plein écran façon menu de jeu (remplace le tiroir latéral)
+- [x] Remise à zéro : statistiques, réglages, ou tout effacer
 - [x] Import de polices personnalisées (.ttf/.otf/.woff, embarquées dans le profil)
 - [x] Création de thèmes (thème « perso » sur mesure)
 - [x] Couleurs personnalisables (fond, page, texte)

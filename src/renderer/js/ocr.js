@@ -76,7 +76,7 @@ async function ocrPdf(pdf) {
       ocrPage = i - 1;
       ocrPageProgress = 0;
       ocrShowProgress();
-      const page = await pdf.getPage(i);
+      const page = await cancellable(pdf.getPage(i));
       const base = page.getViewport({ scale: 1 });
       // vise ~2000 px de large pour une bonne reconnaissance (~250 dpi)
       const scale = Math.min(3, Math.max(1.5, 2000 / base.width));
@@ -84,8 +84,8 @@ async function ocrPdf(pdf) {
       const canvas = document.createElement('canvas');
       canvas.width = Math.ceil(viewport.width);
       canvas.height = Math.ceil(viewport.height);
-      await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-      const { data } = await worker.recognize(canvas);
+      await cancellable(page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise);
+      const { data } = await cancellable(worker.recognize(canvas));
       ocrTextToParas(data.text, paras);
       canvas.width = canvas.height = 0; // libère la mémoire du canvas
       if (page.cleanup) page.cleanup();

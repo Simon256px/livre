@@ -38,7 +38,8 @@ async function addBooks(paths) {
         cover = meta.cover;
         pages = opf.getElementsByTagNameNS('*', 'itemref').length;
       } else {
-        const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buf), ...PDF_OPTS }).promise;
+        await pdfWorkerReady;
+        const pdf = await cancellable(pdfjsLib.getDocument({ data: new Uint8Array(buf), ...PDF_OPTS }).promise);
         const meta = await pdf.getMetadata().catch(() => null);
         title = String(meta?.info?.Title || '').trim() || title;
         author = String(meta?.info?.Author || '').trim();
@@ -62,6 +63,7 @@ async function addBooks(paths) {
         readingSeconds: 0,
         annotations: [],
         bookmarks: [],
+        sketches: [],
         favorite: false,
         tags: [],
         addedAt: Date.now(),
@@ -190,6 +192,7 @@ async function exportLibrary() {
     version: store.version,
     settings: store.settings,
     stats: store.stats,
+    achievements: store.achievements,
     books: store.books,
   };
   const stamp = new Date().toISOString().slice(0, 10);
@@ -235,6 +238,9 @@ async function importLibrary() {
       store.books.push(ib);
       added++;
     }
+  }
+  if (data.achievements) {
+    store.achievements = { ...data.achievements, ...store.achievements };
   }
   // stats : on prend le max par jour (évite de doubler lors d'une restauration)
   if (data.stats && data.stats.daily) {

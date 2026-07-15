@@ -194,6 +194,19 @@ function renderNotesDrawer() {
         : '<li class="list-empty">Aucun surlignage ne correspond.</li>')
     : '<li class="list-empty">Sélectionne du texte pour surligner.</li>';
 
+  const sketches = b.sketches || [];
+  $('#sketchList').innerHTML = sketches.length
+    ? sketches.map((s) =>
+        `<li data-sk="${s.id}"><img src="${s.image}" alt=""><button class="item-del" data-sk-del="${s.id}" title="Supprimer">✕</button></li>`
+      ).join('')
+    : '<li class="list-empty">Bouton ✏️ pour dessiner sur la page.</li>';
+  $$('#sketchList li[data-sk]').forEach((li) =>
+    li.addEventListener('click', () => showSketch(li.dataset.sk)));
+  $$('[data-sk-del]').forEach((btn) => btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    deleteSketch(btn.dataset.skDel);
+  }));
+
   $$('#bookmarkList li[data-para], #annList li[data-para]').forEach((li) =>
     li.addEventListener('click', () => jumpToPara(Number(li.dataset.para))));
   $$('[data-bm]').forEach((btn) => btn.addEventListener('click', (e) => {

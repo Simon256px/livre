@@ -28,6 +28,18 @@ function foldWithMap(str) {
 const pdfjsLib = window.pdfjsLib || window['pdfjs-dist/build/pdf'];
 pdfjsLib.GlobalWorkerOptions.workerSrc =
   new URL('../../node_modules/pdfjs-dist/build/pdf.worker.min.js', location.href).href;
+// Les Worker file:// sont refusés par Chromium : pdf.js retombe alors sur un
+// « fake worker » qui décode sur le thread UI et gèle l'app sur les gros PDF.
+// On charge donc le code du worker en blob: pour garantir un vrai thread.
+const pdfWorkerReady = (async () => {
+  try {
+    const code = await (await fetch(pdfjsLib.GlobalWorkerOptions.workerSrc)).text();
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      URL.createObjectURL(new Blob([code], { type: 'text/javascript' }));
+  } catch (e) {
+    console.error('[pdf] worker blob impossible, fallback fake worker', e);
+  }
+})();
 const PDF_OPTS = {
   isEvalSupported: false, // neutralise CVE-2024-4367 (JS via polices piégées)
   standardFontDataUrl: new URL('../../node_modules/pdfjs-dist/standard_fonts/', location.href).href,
@@ -45,6 +57,7 @@ const FONTS = {
   atkinson: "'Atkinson Hyperlegible', 'Segoe UI', sans-serif",
   plex: "'IBM Plex Serif', Georgia, serif",
   opendyslexic: "'OpenDyslexic', 'Comic Sans MS', sans-serif",
+  manrope: "'Manrope', 'Segoe UI', sans-serif",
   georgia: "Georgia, 'Times New Roman', serif",
   palatino: "'Palatino Linotype', 'Book Antiqua', Georgia, serif",
   segoe: "'Segoe UI', system-ui, sans-serif",
@@ -68,7 +81,8 @@ const DEFAULT_SETTINGS = {
   dailyGoalMin: 20,  // objectif de lecture quotidien en minutes (0 = off)
   pomodoroFocus: 25, // durée d'une session de lecture (minutes)
   pomodoroBreak: 5,  // durée d'une pause (minutes)
-  pageAnim: 'slide', // 'slide' | 'fade' | 'curl' | 'none'
+  pageAnim: 'slide', // 'slide' | 'curl' | 'none'
+  bookDesign: true,  // mise en page d'auteur : chapitres, lettrines, ornements
   custom: { bg: '#EAE4D3', paper: '#F7F1E1', ink: '#2A2620' }, // thème sur mesure
   customFonts: [],   // [{ name, data(base64) }] polices importées
 };
@@ -79,13 +93,17 @@ function hexToRgb(hex) {
   return m ? `${parseInt(m[1], 16)}, ${parseInt(m[2], 16)}, ${parseInt(m[3], 16)}` : '0, 0, 0';
 }
 
-let store = { version: 2, settings: { ...DEFAULT_SETTINGS }, books: [], stats: { daily: {} } };
+let store = { version: 2, settings: { ...DEFAULT_SETTINGS }, books: [], stats: { daily: {} }, achievements: {} };
 // { book, paras, page, total, totalCols, cols, colW, lastCol, toc }
 let current = null;
 let timerId = null;
 let searchState = { active: false, q: '', results: [], idx: 0 };
 
-const persist = debounce(() => window.livre.saveStore(store), 500);
+const persist = debounce(() => {
+  // Vérifie les succès à chaque sauvegarde : ils dépendent des mêmes données
+  if (typeof checkAchievements === 'function') checkAchievements();
+  window.livre.saveStore(store);
+}, 500);
 // Écriture immédiate (fermeture de fenêtre, sortie du lecteur) : garantit
 // que la position de lecture n'est jamais perdue.
 function flushStore() {
@@ -130,6 +148,25 @@ class CancelledError extends Error {
 }
 function throwIfCancelled() {
   if (loadCancelled) throw new CancelledError();
+}
+// Rend une promesse longue (page pdf.js…) interruptible : surveille le
+// drapeau d'annulation pendant l'attente et rejette immédiatement.
+function cancellable(promise) {
+  return new Promise((resolve, reject) => {
+    const iv = setInterval(() => {
+      if (loadCancelled) { clearInterval(iv); reject(new CancelledError()); }
+    }, 150);
+    promise.then(
+      (v) => { clearInterval(iv); resolve(v); },
+      (e) => { clearInterval(iv); reject(e); }
+    );
+  });
+}
+function withTimeout(promise, ms) {
+  return Promise.race([
+    promise,
+    new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms)),
+  ]);
 }
 
 function showLoader(text, { progress = false, cancelable = false } = {}) {

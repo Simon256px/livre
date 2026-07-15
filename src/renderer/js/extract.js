@@ -17,8 +17,8 @@ async function extractPdf(pdf, onProgress) {
   let figCount = 0;
   for (let i = 1; i <= pdf.numPages; i++) {
     throwIfCancelled();
-    const page = await pdf.getPage(i);
-    const tc = await page.getTextContent();
+    const page = await cancellable(pdf.getPage(i));
+    const tc = await cancellable(page.getTextContent());
     const lines = [];
     let cur = null;
     const flush = () => { if (cur && cur.text.trim()) lines.push(cur); cur = null; };
@@ -138,32 +138,47 @@ async function extractPdf(pdf, onProgress) {
   return { paras, words };
 }
 
-// Les images décodées par pdf.js sont récupérées après getOperatorList
+// Les images décodées par pdf.js sont récupérées après getOperatorList.
+// Timeout par page : une page pathologique ne doit pas bloquer le livre.
 async function extractPageImages(page) {
   const out = [];
   try {
-    const ops = await page.getOperatorList();
+    const ops = await cancellable(withTimeout(page.getOperatorList(), 10000));
     const seen = new Set();
     for (let i = 0; i < ops.fnArray.length; i++) {
       if (ops.fnArray[i] !== pdfjsLib.OPS.paintImageXObject) continue;
       const name = ops.argsArray[i][0];
       if (seen.has(name)) continue;
       seen.add(name);
+      throwIfCancelled();
+      // Les images réutilisées sur plusieurs pages sont promues en objets
+      // globaux (noms « g_… », stockés dans commonObjs) : interroger
+      // page.objs pour elles ne répond jamais. Garde-fou 3 s dans tous
+      // les cas pour qu'un objet jamais résolu ne fige pas l'extraction.
       const img = await new Promise((res) => {
-        try { page.objs.get(name, res); } catch { res(null); }
+        let done = false;
+        const cb = (v) => { if (!done) { done = true; res(v); } };
+        try {
+          const objStore = name.startsWith('g_') ? page.commonObjs : page.objs;
+          objStore.get(name, cb);
+        } catch { cb(null); }
+        setTimeout(() => cb(null), 3000);
       });
       if (!img || !img.width || img.width < 90 || img.height < 90) continue;
       const src = pdfImgToDataURL(img);
       if (src) out.push({ type: 'img', src });
       if (out.length >= 8) break; // garde-fou par page
     }
-  } catch { /* page sans op-list exploitable : tant pis pour ses images */ }
+  } catch (e) {
+    if (e instanceof CancelledError) throw e;
+    /* timeout ou op-list inexploitable : tant pis pour les images de la page */
+  }
   return out;
 }
 
 function pdfImgToDataURL(img) {
   try {
-    const canvas = document.createElement('canvas');
+    let canvas = document.createElement('canvas');
     canvas.width = img.width;
     canvas.height = img.height;
     const ctx = canvas.getContext('2d');
@@ -188,6 +203,16 @@ function pdfImgToDataURL(img) {
       ctx.putImageData(new ImageData(rgba, img.width, img.height), 0, 0);
     } else {
       return null;
+    }
+    // Réduit les très grandes images : limite le poids du cache et la mémoire
+    const MAXW = 1400;
+    if (canvas.width > MAXW) {
+      const scaled = document.createElement('canvas');
+      scaled.width = MAXW;
+      scaled.height = Math.round(canvas.height * (MAXW / canvas.width));
+      scaled.getContext('2d').drawImage(canvas, 0, 0, scaled.width, scaled.height);
+      canvas.width = 0; // libère l'original
+      canvas = scaled;
     }
     return canvas.toDataURL('image/jpeg', 0.82);
   } catch {
@@ -331,7 +356,8 @@ async function getContent(book) {
   if (book.format === 'epub') {
     result = await extractEpub(buf, (i, n) => setProgress(i, n, 'Extraction du texte'));
   } else {
-    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buf), ...PDF_OPTS }).promise;
+    await pdfWorkerReady; // garantit un vrai worker (thread UI libre → annulable)
+    const pdf = await cancellable(pdfjsLib.getDocument({ data: new Uint8Array(buf), ...PDF_OPTS }).promise);
     try {
       result = await extractPdf(pdf, (i, n) => setProgress(i, n, 'Extraction du texte'));
       // PDF quasi sans texte → probablement un scan : proposer l'OCR

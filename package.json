@@ -1,7 +1,7 @@
 {
   "name": "livre",
   "productName": "Livre",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Un lecteur qui transforme vos PDF en véritable expérience de lecture — texture papier, typographie soignée, bionic reading.",
   "author": "Simon Courtois <simoncrts@protonmail.com>",
   "license": "MIT",
@@ -17,7 +17,9 @@
     "@fontsource/atkinson-hyperlegible": "^5.2.8",
     "@fontsource/ibm-plex-serif": "^5.2.7",
     "@fontsource/literata": "^5.2.8",
+    "@fontsource/manrope": "^5.2.8",
     "@fontsource/opendyslexic": "^5.2.5",
+    "electron-updater": "^6.8.9",
     "jszip": "^3.10.1",
     "pdfjs-dist": "^3.11.174",
     "tesseract.js": "^7.0.0"
@@ -29,6 +31,13 @@
   "build": {
     "appId": "com.simoncrts.livre",
     "productName": "Livre",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Simon256px",
+        "repo": "livre"
+      }
+    ],
     "directories": {
       "output": "release",
       "buildResources": "build"

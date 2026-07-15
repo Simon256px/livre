@@ -86,6 +86,7 @@ function syncControls() {
   $('#marginVal').textContent = s.pageMargin + ' px';
   document.documentElement.style.setProperty('--page-margin', s.pageMargin + 'px');
   $('#pageSoundChk').checked = s.pageSound;
+  $('#bookDesignChk').checked = s.bookDesign;
   $('#justifyChk').checked = s.justify;
   $('#bionicChk').checked = s.bionic;
   $('#intensityRange').value = s.bionicIntensity;
@@ -110,21 +111,34 @@ function applySettings(rerender) {
   if (rerender) relayout();
 }
 
-function closeRightDrawers() {
-  $('#settingsDrawer').classList.remove('open');
-  $('#notesDrawer').classList.remove('open');
-}
-
 function toggleDrawer(id) {
   const el = $(id);
   const wasOpen = el.classList.contains('open');
-  closeRightDrawers();
-  if (id !== '#tocDrawer') $('#tocDrawer').classList.remove('open');
+  $('#notesDrawer').classList.remove('open');
+  $('#tocDrawer').classList.remove('open');
   if (!wasOpen) el.classList.add('open');
 }
 
+/* --- Page Options (menu de jeu) --- */
+function optionsVisible() {
+  return !$('#optionsScreen').classList.contains('hidden');
+}
+function openOptions(pane) {
+  syncControls();
+  renderAchievements();
+  if (pane) switchOptPane(pane);
+  $('#optionsScreen').classList.remove('hidden');
+}
+function closeOptions() {
+  $('#optionsScreen').classList.add('hidden');
+}
+function switchOptPane(pane) {
+  $$('#optNav .opt-tab').forEach((b) => b.classList.toggle('active', b.dataset.pane === pane));
+  $$('.opt-pane').forEach((p) => p.classList.toggle('hidden', p.dataset.pane !== pane));
+}
+
 function buildUI() {
-  for (const holder of ['#libDots', '#readerDots']) {
+  for (const holder of ['#libDots', '#readerDots', '#optDots']) {
     $(holder).innerHTML = THEMES.map((t) =>
       `<button class="dot" data-theme="${t}" title="Thème ${t}"></button>`).join('');
   }
@@ -166,6 +180,23 @@ function buildUI() {
   $('#tocBtn').addEventListener('click', () => toggleDrawer('#tocDrawer'));
   $('#searchBtn').addEventListener('click', openSearch);
   $('#bookmarkBtn').addEventListener('click', toggleBookmark);
+  $('#sketchBtn').addEventListener('click', () => {
+    if (sketchVisible()) sketchClose(true);
+    else sketchOpen();
+  });
+  const sketchCanvas = $('#sketchCanvas');
+  sketchCanvas.addEventListener('pointerdown', sketchPointerDown);
+  sketchCanvas.addEventListener('pointermove', sketchPointerMove);
+  sketchCanvas.addEventListener('pointerup', sketchPointerUp);
+  sketchCanvas.addEventListener('pointercancel', sketchPointerUp);
+  $$('#sketchTools .pen').forEach((d) => d.addEventListener('click', () => {
+    sketch.color = SKETCH_COLORS[d.dataset.pen];
+    $$('#sketchTools .pen').forEach((x) => x.classList.toggle('sel', x === d));
+  }));
+  $('#sketchClearBtn').addEventListener('click', sketchClear);
+  $('#sketchSaveBtn').addEventListener('click', () => sketchClose(true));
+  $('#sketchCancelBtn').addEventListener('click', () => sketchClose(false));
+  $('#sketchView').addEventListener('click', hideSketchView);
   $('#notesBtn').addEventListener('click', () => {
     notesQuery = '';
     $('#notesSearch').value = '';
@@ -184,7 +215,7 @@ function buildUI() {
     applySettings(false);
   });
   $('#fullscreenBtn').addEventListener('click', toggleFullscreen);
-  $('#settingsBtn').addEventListener('click', () => toggleDrawer('#settingsDrawer'));
+  $('#settingsBtn').addEventListener('click', () => openOptions());
   $('#prevBtn').addEventListener('click', () => turnPage(-1));
   $('#nextBtn').addEventListener('click', () => turnPage(1));
 
@@ -206,7 +237,74 @@ function buildUI() {
   /* --- Tiroirs --- */
   $('#tocCloseBtn').addEventListener('click', () => $('#tocDrawer').classList.remove('open'));
   $('#notesCloseBtn').addEventListener('click', () => $('#notesDrawer').classList.remove('open'));
-  $('#closeDrawerBtn').addEventListener('click', () => $('#settingsDrawer').classList.remove('open'));
+  $('#optCloseBtn').addEventListener('click', closeOptions);
+  $$('#optNav .opt-tab').forEach((b) =>
+    b.addEventListener('click', () => switchOptPane(b.dataset.pane)));
+  $('#libOptionsBtn').addEventListener('click', () => openOptions());
+  $('#optExportLib').addEventListener('click', exportLibrary);
+  $('#optImportLib').addEventListener('click', importLibrary);
+  $('#resetStatsBtn').addEventListener('click', () => {
+    if (!confirm('Réinitialiser toutes les statistiques (temps, streak, succès) ?')) return;
+    store.stats = { daily: {} };
+    store.achievements = {};
+    persist();
+    renderAchievements();
+    renderLibrary();
+    toast('Statistiques réinitialisées');
+  });
+  $('#resetSettingsBtn').addEventListener('click', () => {
+    if (!confirm('Revenir aux réglages par défaut ?\n(Bibliothèque, notes et stats conservées.)')) return;
+    const fonts = store.settings.customFonts;
+    store.settings = { ...DEFAULT_SETTINGS, customFonts: fonts };
+    persist();
+    syncControls();
+    if (current && readerVisible()) relayout();
+    toast('Réglages réinitialisés');
+  });
+  $('#resetAllBtn').addEventListener('click', async () => {
+    if (!confirm('Tout effacer : bibliothèque, notes, statistiques et réglages ?\nLes fichiers PDF/EPUB sur le disque ne sont pas touchés.')) return;
+    if (!confirm('Vraiment sûr ? Cette action est définitive.')) return;
+    for (const b of store.books) window.livre.deleteCache(b.id);
+    store = { version: 2, settings: { ...DEFAULT_SETTINGS }, books: [], stats: { daily: {} }, achievements: {} };
+    flushStore();
+    syncControls();
+    rebuildFontSelect();
+    renderAchievements();
+    renderLibrary();
+    closeOptions();
+    toast('Tout a été effacé');
+  });
+  $('#bookDesignChk').addEventListener('change', (e) => {
+    store.settings.bookDesign = e.target.checked;
+    applySettings(true);
+  });
+
+  /* --- Mise à jour intégrée --- */
+  window.livre.getVersion().then((v) => { $('#appVersion').textContent = 'Livre v' + v; });
+  $('#checkUpdateBtn').addEventListener('click', async () => {
+    const st = $('#updateStatus');
+    st.textContent = 'Vérification en cours…';
+    const r = await window.livre.checkUpdates();
+    if (r.status === 'dev') st.textContent = 'Version de développement : mise à jour via git.';
+    else if (r.status === 'uptodate') st.textContent = 'Tu as déjà la dernière version ✦';
+    else if (r.status === 'ready') {
+      st.textContent = `Version ${r.version} téléchargée — clique pour installer.`;
+      $('#installUpdateBtn').classList.remove('hidden');
+    } else st.textContent = 'Vérification impossible : ' + (r.message || 'erreur inconnue');
+  });
+  window.livre.onUpdateState((s) => {
+    const st = $('#updateStatus');
+    if (s.state === 'downloading') st.textContent = `Téléchargement de la version ${s.version}…`;
+    else if (s.state === 'progress') st.textContent = `Téléchargement… ${s.percent} %`;
+    else if (s.state === 'ready') {
+      st.textContent = `Version ${s.version} prête — clique pour installer.`;
+      $('#installUpdateBtn').classList.remove('hidden');
+    }
+  });
+  $('#installUpdateBtn').addEventListener('click', () => {
+    flushStore();
+    window.livre.installUpdate();
+  });
   $('#exportBtn').addEventListener('click', exportAnnotations);
   $('#exportPdfBtn').addEventListener('click', exportAnnotationsPdf);
   $('#notesSearch').addEventListener('input', debounce((e) => {
@@ -348,11 +446,41 @@ function buildUI() {
     $('#rsvpWpmVal').textContent = store.settings.rsvpWpm + ' mots/min';
     persist();
   });
-  const seekFromEvent = (e) => {
-    const r = $('#rsvpBar').getBoundingClientRect();
-    rsvpSeek(Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)));
+  // Barre glissable : pointer capture (souris, doigt, stylet) + bulle d'aperçu
+  const rsvpBar = $('#rsvpBar');
+  const barFrac = (e) => {
+    const r = rsvpBar.getBoundingClientRect();
+    return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
   };
-  $('#rsvpBar').addEventListener('click', seekFromEvent);
+  const updateBubble = (e) => {
+    const f = barFrac(e);
+    const idx = Math.round(f * (rsvp.words.length - 1));
+    const w = rsvp.words[idx];
+    if (!w) return;
+    const bubble = $('#rsvpBubble');
+    bubble.textContent = w.w;
+    const pct = document.createElement('span');
+    pct.className = 'pct';
+    pct.textContent = Math.round(f * 100) + ' %';
+    bubble.appendChild(pct);
+    bubble.style.left = (f * 100) + '%';
+  };
+  rsvpBar.addEventListener('pointerdown', (e) => {
+    rsvpBar.classList.add('dragging');
+    rsvpBar.setPointerCapture(e.pointerId);
+    rsvpSeek(barFrac(e));
+    updateBubble(e);
+  });
+  rsvpBar.addEventListener('pointermove', (e) => {
+    updateBubble(e);
+    if (rsvpBar.classList.contains('dragging')) rsvpSeek(barFrac(e));
+  });
+  const endDrag = (e) => {
+    rsvpBar.classList.remove('dragging');
+    try { rsvpBar.releasePointerCapture(e.pointerId); } catch {}
+  };
+  rsvpBar.addEventListener('pointerup', endDrag);
+  rsvpBar.addEventListener('pointercancel', endDrag);
   $('#rsvpContext').addEventListener('click', (e) => {
     const w = e.target.closest('.w');
     if (w) rsvpGoto(Number(w.dataset.i));
@@ -360,6 +488,10 @@ function buildUI() {
 
   /* --- Clavier --- */
   document.addEventListener('keydown', (e) => {
+    if (optionsVisible()) {
+      if (e.key === 'Escape') closeOptions();
+      return;
+    }
     if (rsvpVisible()) {
       if (e.key === ' ') { e.preventDefault(); rsvpSetPlaying(!rsvp.playing); }
       else if (e.key === 'ArrowRight') { e.preventDefault(); rsvpStep(1); }
@@ -385,7 +517,9 @@ function buildUI() {
       e.preventDefault();
       turnPage(-1);
     } else if (e.key === 'Escape') {
-      if (dictVisible()) hideDictPopover();
+      if (!$('#sketchView').classList.contains('hidden')) hideSketchView();
+      else if (sketchVisible()) sketchClose(false);
+      else if (dictVisible()) hideDictPopover();
       else if (!$('#hlToolbar').classList.contains('hidden')) hideHlToolbar();
       else if (!$('#searchBar').classList.contains('hidden')) closeSearch();
       else if ($$('.drawer.open').length) {
@@ -465,6 +599,7 @@ function buildUI() {
       author: '',
       annotations: [],
       bookmarks: [],
+      sketches: [],
       favorite: false,
       tags: [],
       ...b,
@@ -473,6 +608,7 @@ function buildUI() {
     store.stats.daily = store.stats.daily || {};
     store.settings.custom = { ...DEFAULT_SETTINGS.custom, ...(store.settings.custom || {}) };
     store.settings.customFonts = store.settings.customFonts || [];
+    store.achievements = store.achievements || {};
   }
   // Ré-enregistre les polices importées avant de bâtir l'interface
   store.settings.customFonts.forEach((f) => registerCustomFont(f.name, f.data));
