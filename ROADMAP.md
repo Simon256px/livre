@@ -1,6 +1,6 @@
 # 🗺️ Roadmap
 
-Backlog des fonctionnalités envisagées pour Livre, par thème.
+Backlog des fonctionnalités envisagées pour MontLivre, par thème.
 Les cases cochées sont déjà dans la version actuelle.
 
 > **Principe** : tout fonctionne offline par défaut. Les fonctionnalités qui

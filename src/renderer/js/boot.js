@@ -280,7 +280,7 @@ function buildUI() {
   });
 
   /* --- Mise à jour intégrée --- */
-  window.livre.getVersion().then((v) => { $('#appVersion').textContent = 'Livre v' + v; });
+  window.livre.getVersion().then((v) => { $('#appVersion').textContent = 'MontLivre v' + v; });
   $('#checkUpdateBtn').addEventListener('click', async () => {
     const st = $('#updateStatus');
     st.textContent = 'Vérification en cours…';

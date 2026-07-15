@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs/promises');
+const fsSync = require('node:fs');
 
 let win = null;
 
@@ -8,11 +9,34 @@ let win = null;
 // dans le renderer et logge son résultat, LIVRE_SHOT capture l'écran
 if (process.env.LIVRE_USERDATA) app.setPath('userData', process.env.LIVRE_USERDATA);
 
+// Renommage « Livre » → « MontLivre » : le dossier de profil change de nom.
+// On rapatrie une seule fois la bibliothèque, les notes, les croquis, les
+// réglages et le cache d'extraction pour ne rien perdre à la mise à jour.
+function migrateUserData() {
+  if (process.env.LIVRE_USERDATA) return;
+  try {
+    const appData = app.getPath('appData');
+    const oldDir = path.join(appData, 'Livre');
+    const newDir = path.join(appData, 'MontLivre');
+    if (fsSync.existsSync(newDir) || !fsSync.existsSync(oldDir)) return;
+    fsSync.mkdirSync(newDir, { recursive: true });
+    // Seulement nos données : les caches Chromium n'ont pas à suivre.
+    const store = path.join(oldDir, 'livre-store.json');
+    if (fsSync.existsSync(store)) fsSync.copyFileSync(store, path.join(newDir, 'livre-store.json'));
+    const cache = path.join(oldDir, 'cache');
+    if (fsSync.existsSync(cache)) fsSync.cpSync(cache, path.join(newDir, 'cache'), { recursive: true });
+    console.log('[main] profil repris depuis', oldDir);
+  } catch (e) {
+    console.error('[main] migration du profil impossible :', e);
+  }
+}
+migrateUserData();
+
 const storePath = () => path.join(app.getPath('userData'), 'livre-store.json');
 const cacheDir = () => path.join(app.getPath('userData'), 'cache');
 const cachePath = (id) => path.join(cacheDir(), id.replace(/[^a-z0-9-]/gi, '') + '.json');
 
-// PDF/EPUB passés en ligne de commande : `livre mon-livre.pdf`
+// PDF/EPUB passés en ligne de commande : `montlivre mon-livre.pdf`
 const fileArgs = process.argv
   .slice(app.isPackaged ? 1 : 2)
   .filter((a) => /\.(pdf|epub)$/i.test(a))
@@ -24,7 +48,7 @@ function createWindow() {
     height: 860,
     minWidth: 900,
     minHeight: 620,
-    title: 'Livre',
+    title: 'MontLivre',
     backgroundColor: '#F2EBDA',
     autoHideMenuBar: true,
     webPreferences: {
@@ -136,7 +160,7 @@ ipcMain.handle('delete-cache', async (_e, id) => {
 
 const FILTERS = {
   md: [{ name: 'Markdown', extensions: ['md'] }],
-  json: [{ name: 'Bibliothèque Livre (JSON)', extensions: ['json'] }],
+  json: [{ name: 'Bibliothèque MontLivre (JSON)', extensions: ['json'] }],
 };
 
 // Tests : écrit dans LIVRE_TEST_EXPORT_DIR sans dialogue

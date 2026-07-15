@@ -187,7 +187,7 @@ function editTags(id) {
 
 async function exportLibrary() {
   const data = {
-    app: 'livre',
+    app: 'montlivre',
     exportedAt: new Date().toISOString(),
     version: store.version,
     settings: store.settings,
@@ -197,7 +197,7 @@ async function exportLibrary() {
   };
   const stamp = new Date().toISOString().slice(0, 10);
   const path = await window.livre.exportFile({
-    defaultName: `Bibliotheque Livre - ${stamp}.json`,
+    defaultName: `Bibliotheque MontLivre - ${stamp}.json`,
     content: JSON.stringify(data, null, 2),
     kind: 'json',
   });
@@ -214,8 +214,9 @@ async function importLibrary() {
     alert("Fichier illisible : ce n'est pas un export de bibliothèque valide.");
     return;
   }
-  if (data.app !== 'livre' || !Array.isArray(data.books)) {
-    alert("Ce fichier n'est pas un export de bibliothèque Livre.");
+  // « livre » : sauvegardes d'avant le renommage en MontLivre
+  if (!['montlivre', 'livre'].includes(data.app) || !Array.isArray(data.books)) {
+    alert("Ce fichier n'est pas un export de bibliothèque MontLivre.");
     return;
   }
   let added = 0, merged = 0;

@@ -1,8 +1,8 @@
 {
-  "name": "livre",
-  "productName": "Livre",
-  "version": "0.9.0",
-  "description": "Un lecteur qui transforme vos PDF en véritable expérience de lecture — texture papier, typographie soignée, bionic reading.",
+  "name": "montlivre",
+  "productName": "MontLivre",
+  "version": "0.9.1",
+  "description": "MontLivre — un lecteur qui transforme vos PDF et EPUB en véritable expérience de lecture : texture papier, typographie soignée, OCR, bionic reading.",
   "author": "Simon Courtois <simoncrts@protonmail.com>",
   "license": "MIT",
   "main": "src/main.js",
@@ -30,12 +30,12 @@
   },
   "build": {
     "appId": "com.simoncrts.livre",
-    "productName": "Livre",
+    "productName": "MontLivre",
     "publish": [
       {
         "provider": "github",
         "owner": "Simon256px",
-        "repo": "livre"
+        "repo": "MontLivre"
       }
     ],
     "directories": {
@@ -56,7 +56,7 @@
     "win": {
       "target": "nsis",
       "icon": "build/icon.png",
-      "artifactName": "Livre-Setup-${version}.${ext}"
+      "artifactName": "MontLivre-Setup-${version}.${ext}"
     },
     "nsis": {
       "oneClick": false,

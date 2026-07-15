@@ -35,7 +35,7 @@ async function openBook(id) {
         : `la page ${current.page + 1}`;
       toast(`Repris à ${where}`);
     }
-    console.log(`[livre] ouvert : ${book.title} — ${paras.length} blocs, ${words} mots`);
+    console.log(`[montlivre] ouvert : ${book.title} — ${paras.length} blocs, ${words} mots`);
   } catch (e) {
     if (e instanceof CancelledError) {
       switchScreen('library');

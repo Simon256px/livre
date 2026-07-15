@@ -1,9 +1,15 @@
-# 📖 Livre
+<p align="center">
+  <img src="build/icon.png" alt="MontLivre" width="160">
+</p>
 
-**Un lecteur élégant qui transforme vos PDF et EPUB en véritable expérience de lecture.**
+<h1 align="center">MontLivre</h1>
 
-Livre est une application de bureau (Electron) qui prend vos PDF et EPUB et les re-met en page comme un vrai livre : texture papier, typographie soignée, modes lumière, Bionic Reading. 100 % offline, aucun compte, aucune donnée envoyée.
+<p align="center"><strong>Un lecteur élégant qui transforme vos PDF et EPUB en véritable expérience de lecture.</strong></p>
 
+MontLivre est une application de bureau (Electron) qui prend vos PDF et EPUB et les re-met en page comme un vrai livre : texture papier, typographie soignée, modes lumière, Bionic Reading. 100 % offline, aucun compte, aucune donnée envoyée.
+
+> 📥 **[Télécharger la dernière version](https://github.com/Simon256px/MontLivre/releases/latest)** — ensuite, les mises à jour se font depuis l'app (Options → Mise à jour).
+>
 > 🗺️ La liste complète des fonctionnalités envisagées et leur avancement : [ROADMAP.md](ROADMAP.md)
 
 ## ✨ Fonctionnalités

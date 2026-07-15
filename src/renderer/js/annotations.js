@@ -232,7 +232,7 @@ async function exportAnnotations() {
   const lines = [
     `# Notes de lecture — ${b.title}`,
     '',
-    `_Exporté depuis Livre le ${new Date().toLocaleDateString('fr-FR')}_`,
+    `_Exporté depuis MontLivre le ${new Date().toLocaleDateString('fr-FR')}_`,
     '',
   ];
   if (b.bookmarks.length) {
@@ -309,7 +309,7 @@ async function exportAnnotationsPdf() {
     .ch { color: #8A8172; font-style: italic; }
   </style></head><body>
     <header><h1>${esc(b.title)}</h1>
-      <div class="sub">Notes de lecture${b.author ? ` · ${esc(b.author)}` : ''} · exporté depuis Livre le ${new Date().toLocaleDateString('fr-FR')}</div>
+      <div class="sub">Notes de lecture${b.author ? ` · ${esc(b.author)}` : ''} · exporté depuis MontLivre le ${new Date().toLocaleDateString('fr-FR')}</div>
     </header>${body}</body></html>`;
   const safe = b.title.replace(/[<>:"/\\|?*]/g, '').slice(0, 60);
   const path = await window.livre.exportPdf({ defaultName: `Notes - ${safe}.pdf`, html });
