@@ -1,27 +1,31 @@
 # 🗺️ Roadmap
 
-Backlog des fonctionnalités envisagées pour MontLivre, par thème.
-Les cases cochées sont déjà dans la version actuelle.
+**Le cap : faire de MontLivre un compagnon de lecture immersive et profonde** —
+on ouvre un texte, on y reste : les définitions, les notes de bas de page, un
+second livre en regard… tout vient au lecteur sans jamais lui faire perdre sa
+page. La bibliothèque doit accueillir tous les formats et retrouver n'importe
+quelle phrase, où qu'elle soit.
+
+Backlog par thème ; les cases cochées sont déjà dans la version actuelle.
 
 > **Principe** : tout fonctionne offline par défaut. Les fonctionnalités qui
-> nécessitent le réseau (cloud, IA, traduction, Wikipédia) seront optionnelles
-> et clairement signalées.
+> nécessitent le réseau (cloud, catalogues, IA, traduction, Wikipédia) seront
+> optionnelles et clairement signalées.
 
 ## 🚀 Prochaines étapes proposées
 
-- ~~v0.2 — Lire confortablement + annoter~~ ✅ livré
-- ~~v0.2.1 — Chargement interruptible, RSVP libre~~ ✅ livré
-- ~~v0.3 — Dictionnaire (Wiktionnaire), reprise fiable~~ ✅ livré
-- ~~v0.4 — RSVP visuel, TTS retiré, installeur Windows~~ ✅ livré
-- ~~v0.5 — OCR des PDF scannés (Tesseract embarqué)~~ ✅ livré
-- ~~v0.6 — Confort : objectif quotidien, Pomodoro, favoris/tags/étagères~~ ✅ livré
-- ~~v0.7 — Export PDF, recherche notes, import/export biblio, contraste, marges, sons~~ ✅ livré
-- ~~v0.8 — Personnalisation : thème/couleurs sur mesure, import de polices, page tournée~~ ✅ livré
-- ~~v0.9 — Patch gros PDF, page Options, succès, mise en page d'auteur, stylet, MàJ intégrée~~ ✅ livré
-- **v1.0 — Confort avancé** : lecture verticale/horizontale, affichage liste/étagère,
-  collections nommées, tri intelligent, pages lues par jour
+- ~~v0.2 → v0.9 — moteur de lecture, annotations, OCR, confort, personnalisation,
+  page Options, succès, stylet, mise à jour intégrée~~ ✅ livrés
+- **v1.0 — Rester dans le texte** : notes de bas de page en infobulle,
+  **lecture parallèle** (deux livres côte à côte), surlignage instantané,
+  mode focus paragraphe
+- **v1.1 — Une bibliothèque sans limites** : formats MOBI/AZW3, FB2, CBZ
+  (BD & manga), **recherche plein texte dans toute la bibliothèque**,
+  collections nommées, affichage liste/étagère, tri intelligent
+- **v1.2 — Au-delà d'un seul PC** : versions macOS et Linux, synchronisation
+  multi-appareils (progression, notes, signets), catalogues en ligne OPDS (opt-in)
 - **Plus tard** : traduction/Wikipédia (opt-in), fonctions IA (opt-in),
-  voix neurales locales, sync automatique multi-appareils, lecteurs d'écran
+  voix neurales locales, lecteurs d'écran, version Web
 
 ## 📚 Lecture
 
@@ -37,6 +41,12 @@ Les cases cochées sont déjà dans la version actuelle.
 - [x] Chapitres détectés automatiquement avec sommaire interactif
 - [x] Ouverture directe depuis la ligne de commande (`livre chemin.pdf`)
 - [x] Chargement interruptible des gros fichiers (barre de progression + bouton Interrompre)
+- [ ] Formats supplémentaires : MOBI / AZW3 (Kindle), FB2, CBZ (BD & manga)
+- [ ] **Lecture parallèle** : deux livres côte à côte en écran partagé
+      (une œuvre et son analyse, une VO et sa traduction…)
+- [ ] **Notes de bas de page en infobulle** : la note s'affiche dans un popover
+      au clic, sans jamais quitter sa page
+- [ ] Coloration syntaxique du code (manuels techniques, livres d'informatique)
 
 ## ✍️ Annotations
 
@@ -46,6 +56,8 @@ Les cases cochées sont déjà dans la version actuelle.
 - [x] Dessin au stylet (croquis sur la page, pression gérée, galerie dans Notes)
 - [x] Export des annotations en Markdown
 - [x] Export des annotations en PDF (PDF de notes mis en page)
+- [ ] Surlignage instantané : un seul geste applique la dernière couleur
+      utilisée, sans passer par la palette
 - [ ] Synchronisation automatique des annotations entre appareils
       (l'import/export de bibliothèque permet déjà un transfert manuel)
 
@@ -63,6 +75,8 @@ Les cases cochées sont déjà dans la version actuelle.
 
 - [x] Bionic reading à intensité réglable
 - [x] Mode focus (règle de lecture)
+- [ ] Mode focus paragraphe : le paragraphe courant net, le reste estompé,
+      on avance au clic ou à la flèche
 - [x] Mode RSVP (un mot à la fois, point de fixation rouge, vitesse réglable,
       reprise à n'importe quel mot via un aperçu lisible cliquable, repères de
       chapitres sur la barre de progression)
@@ -105,7 +119,9 @@ Les cases cochées sont déjà dans la version actuelle.
 - [x] Reprise fiable de la position (sauvegarde immédiate à la fermeture, bouton « Reprendre »)
 - [x] Import/export de la bibliothèque (JSON : livres, annotations, tags, stats — sauvegarde/migration)
 - [ ] Sauvegarde dans le cloud (opt-in)
-- [ ] Synchronisation automatique entre PC, Mac et Linux
+- [ ] Synchronisation automatique entre appareils : fichiers, progression,
+      notes et signets (opt-in)
+- [ ] Synchronisation de la progression avec une liseuse e-ink
 - [ ] Historique des versions des annotations
 
 ## 🔎 Recherche
@@ -115,6 +131,9 @@ Les cases cochées sont déjà dans la version actuelle.
 - [x] Recherche dans la bibliothèque (titre, auteur et tags)
 - [x] Recherche dans les annotations (champ dans le panneau Notes)
 - [x] Recherche par tags (puces de filtrage + étagères)
+- [ ] **Recherche plein texte dans toute la bibliothèque** : retrouver une
+      citation sans savoir dans quel livre elle se trouve (le cache
+      d'extraction s'y prête déjà)
 - [ ] Filtres intelligents
 
 ## 🤖 Fonctionnalités IA (opt-in, jamais requises)
@@ -149,10 +168,21 @@ Les cases cochées sont déjà dans la version actuelle.
 - [ ] Tri intelligent
 - [ ] Recommandations basées sur les habitudes de lecture
 - [ ] Affichage en grille, liste ou étagère
+- [ ] Catalogues en ligne OPDS (opt-in) : parcourir les bibliothèques
+      publiques et ouvrir un livre en deux clics
+- [ ] Intégration Calibre (opt-in) : accéder à sa bibliothèque Calibre existante
+
+## 💻 Plateformes
+
+- [x] Windows (installeur NSIS + mise à jour intégrée)
+- [ ] macOS
+- [ ] Linux (AppImage / Flatpak)
+- [ ] Version Web : lire sa bibliothèque depuis un navigateur
 
 ## 🧪 Fonctionnalités avancées
 
-- [ ] Comparaison de deux éditions d'un même livre
+- [ ] Comparaison de deux éditions d'un même livre (la lecture parallèle en
+      sera la première brique)
 - [ ] Lecture collaborative
 - [ ] Partage de citations
 - [ ] Plugin système
