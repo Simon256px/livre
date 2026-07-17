@@ -46,6 +46,11 @@ function onTextSelected() {
   const sel = getSelection();
   if (!sel.rangeCount || sel.isCollapsed) { hideHlToolbar(); return; }
   if (!selectionRanges()) { hideHlToolbar(); return; }
+  // Surlignage instantané : un geste applique la dernière couleur utilisée
+  if (store.settings.instantHl) {
+    applyHighlight(store.settings.lastHlColor || 'yellow');
+    return;
+  }
   const rect = sel.getRangeAt(0).getBoundingClientRect();
   const tb = $('#hlToolbar');
   tb.classList.remove('hidden');
@@ -62,6 +67,7 @@ function hideHlToolbar() {
 function applyHighlight(color) {
   const ranges = selectionRanges();
   if (!ranges) return;
+  store.settings.lastHlColor = color;
   for (const r of ranges) {
     current.book.annotations.push({
       id: crypto.randomUUID(),

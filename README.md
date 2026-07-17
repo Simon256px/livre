@@ -17,6 +17,8 @@ MontLivre est une application de bureau (Electron) qui prend vos PDF et EPUB et 
 ### Lecture
 - **Reflow intelligent** : extraction du texte (pdf.js), suppression des en-têtes/pieds de page répétés, paragraphes et césures recollés, chapitres détectés
 - **PDF et EPUB** avec le même moteur de rendu, images incluses
+- **Notes de bas de page en infobulle** : cliquez l'appel de note, la note apparaît sans quitter la page
+- **Lecture parallèle** ⿻ : un second livre s'ouvre dans un volet à côté du principal (œuvre + analyse, VO + traduction), avec sa propre position mémorisée
 - **OCR des PDF scannés** : reconnaissance de texte hors ligne (Tesseract WASM, modèles français + anglais embarqués), proposée automatiquement quand un PDF n'a pas de texte
 - **Pagination façon livre** : simple ou double page (auto selon la fenêtre), ou défilement continu
 - **Sommaire interactif**, recherche plein texte (Ctrl+F, insensible aux accents), plein écran immersif (F11)
@@ -25,7 +27,7 @@ MontLivre est une application de bureau (Electron) qui prend vos PDF et EPUB et 
 
 ### Vitesse & confort
 - **Bionic reading** à intensité réglable
-- **Mode focus** : règle de lecture qui suit la souris
+- **Modes focus** : règle de lecture qui suit la souris, ou paragraphe par paragraphe (le reste s'estompe, ↑/↓ pour avancer)
 - **Mode RSVP** : lecture rapide mot à mot avec point de fixation, 150–700 mots/min. En pause, un aperçu lisible du passage (mot courant surligné, repères de chapitres) permet de choisir d'un clic où reprendre
 - **Dictionnaire** au double-clic sur un mot (Wiktionnaire — en ligne, opt-in)
 
@@ -35,6 +37,7 @@ MontLivre est une application de bureau (Electron) qui prend vos PDF et EPUB et 
 
 ### Annotations
 - **Surlignage 4 couleurs** (sélectionner du texte → palette flottante), notes attachées, signets
+- **Surlignage instantané** 🖍 : sélectionner suffit, la dernière couleur s'applique d'un geste
 - **Dessin au stylet** : croquis directement sur la page (pression gérée), galerie dans le panneau Notes
 - **Recherche** dans les notes ; **export Markdown et PDF**, regroupés par chapitre
 

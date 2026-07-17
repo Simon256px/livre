@@ -48,7 +48,28 @@ const PDF_OPTS = {
 };
 
 const GAP = 64; // espace entre deux colonnes-pages
-const CACHE_V = 4; // à incrémenter quand la logique d'extraction change
+const CACHE_V = 5; // à incrémenter quand la logique d'extraction change
+
+// Marqueurs sentinelles insérés pendant l'extraction pour repérer les
+// appels de note, puis convertis en offsets par extractNoteMarkers().
+const NOTE_OPEN = '\uE000';
+const NOTE_SEP = '\uE001';
+const NOTE_CLOSE = '\uE002';
+function makeNoteMarker(key, visible) {
+  return NOTE_OPEN + key + NOTE_SEP + visible + NOTE_CLOSE;
+}
+// Remplace les marqueurs par leur texte visible et renvoie
+// { text, refs: [{ start, end, key }] } (offsets dans le texte final)
+function extractNoteMarkers(text) {
+  const refs = [];
+  const re = new RegExp(NOTE_OPEN + '([^' + NOTE_SEP + ']*)' + NOTE_SEP + '([^' + NOTE_CLOSE + ']*)' + NOTE_CLOSE);
+  let m;
+  while ((m = re.exec(text))) {
+    refs.push({ start: m.index, end: m.index + m[2].length, key: m[1] });
+    text = text.slice(0, m.index) + m[2] + text.slice(m.index + m[0].length);
+  }
+  return { text, refs };
+}
 const THEMES = ['creme', 'sepia', 'ambre', 'nuit', 'contraste', 'perso'];
 const ACCENTS = ['var(--yellow)', 'var(--blue)', 'var(--green)', 'var(--red)', 'var(--pink)', 'var(--purple)'];
 const HL_COLORS = ['yellow', 'green', 'blue', 'pink'];
@@ -73,7 +94,9 @@ const DEFAULT_SETTINGS = {
   pageSound: false, // son de tournage de page
   bionic: false,
   bionicIntensity: 0.45,
-  focus: false,
+  focus: 'off',        // 'off' | 'ruler' (règle) | 'para' (paragraphe)
+  instantHl: false,    // surlignage instantané à la sélection
+  lastHlColor: 'yellow',
   flow: 'pages',   // 'pages' | 'scroll'
   spread: 'auto',  // 'auto' | '1' | '2'
   rsvpWpm: 350,

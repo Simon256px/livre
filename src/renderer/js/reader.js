@@ -8,7 +8,7 @@ async function openBook(id) {
   loadCancelled = false;
   showLoader('Lecture du fichier…', { progress: true, cancelable: true });
   try {
-    const { paras, words } = await getContent(book);
+    const { paras, words, footnotes } = await getContent(book);
     if (!paras.length || words < 8) {
       hideLoader();
       alert("Aucun texte à afficher pour ce livre.\nS'il s'agit d'un scan, rouvre-le pour lancer la reconnaissance de texte (OCR).");
@@ -17,7 +17,7 @@ async function openBook(id) {
     book.words = words;
     book.lastOpenedAt = Date.now();
     persist();
-    current = { book, paras, page: 0, total: 1, totalCols: 1, cols: 1, colW: 0, lastCol: null, toc: [] };
+    current = { book, paras, footnotes: footnotes || {}, page: 0, total: 1, totalCols: 1, cols: 1, colW: 0, lastCol: null, toc: [] };
     searchState = { active: false, q: '', results: [], idx: 0 };
     $('#readerTitle').textContent = book.title;
     $('#runningHead').textContent = book.author ? `${book.title} — ${book.author}` : book.title;
@@ -58,8 +58,10 @@ function closeReader() {
   hideHlToolbar();
   hideAnnPopover();
   hideDictPopover();
+  hideNotePopover();
   sketchClose(false);
   hideSketchView();
+  if (typeof closeCompanion === 'function') closeCompanion();
   flushStore();
   switchScreen('library');
   renderLibrary();
@@ -80,6 +82,13 @@ function renderParaHTML(p, idx) {
       if (r.para === idx) ranges.push({ start: r.start, end: r.end, type: 'hit', id: k });
     }
   }
+  if (p.notes) {
+    for (const n of p.notes) {
+      if (current.footnotes && current.footnotes[n.key] !== undefined) {
+        ranges.push({ start: n.start, end: n.end, type: 'noteref', key: n.key });
+      }
+    }
+  }
   if (!ranges.length) return s.bionic ? bionify(text, s.bionicIntensity) : esc(text);
 
   const cuts = new Set([0, text.length]);
@@ -95,9 +104,13 @@ function renderParaHTML(p, idx) {
     let seg = s.bionic ? bionify(text.slice(a, b), s.bionicIntensity) : esc(text.slice(a, b));
     for (const r of ranges) {
       if (r.start <= a && r.end >= b) {
-        seg = r.type === 'ann'
-          ? `<mark class="hl hl-${r.color}${r.note ? ' has-note' : ''}" data-ann="${r.id}">${seg}</mark>`
-          : `<mark class="hit" data-hit="${r.id}">${seg}</mark>`;
+        if (r.type === 'ann') {
+          seg = `<mark class="hl hl-${r.color}${r.note ? ' has-note' : ''}" data-ann="${r.id}">${seg}</mark>`;
+        } else if (r.type === 'hit') {
+          seg = `<mark class="hit" data-hit="${r.id}">${seg}</mark>`;
+        } else if (r.type === 'noteref') {
+          seg = `<sup class="noteref" data-note="${esc(r.key)}" title="Note">${seg}</sup>`;
+        }
       }
     }
     html += seg;
@@ -119,6 +132,10 @@ function renderContent() {
     return `<p data-i="${i}">${renderParaHTML(p, i)}</p>`;
   }).join('');
   applyPageAnimStyle();
+  updateFocusRuler(); // ré-applique le mode focus paragraphe après un re-rendu
+  if (store.settings.focus === 'para' && current.focusPara != null) {
+    setFocusPara(current.focusPara, false);
+  }
 }
 
 /* ---------- Pagination (pages / double page / défilement) ---------- */
@@ -131,7 +148,10 @@ function paginate() {
   const scroll = s.flow === 'scroll';
 
   vp.classList.toggle('scroll', scroll);
-  const avail = window.innerWidth - 300;
+  // le volet de lecture parallèle prend ~40 % de la largeur
+  const companionW = (typeof companionOpenState === 'function' && companionOpenState())
+    ? Math.round(window.innerWidth * 0.38) : 0;
+  const avail = window.innerWidth - 300 - companionW;
 
   if (scroll) {
     frame.classList.remove('cols2');
@@ -422,6 +442,53 @@ function closeSearch(relayoutAfter = true) {
   if (wasActive && relayoutAfter && current && readerVisible()) relayout();
 }
 
+/* ---------- Notes de bas de page ---------- */
+
+function noteVisible() {
+  return !$('#notePopover').classList.contains('hidden');
+}
+function showNotePopover(key, x, y) {
+  const text = current && current.footnotes[key];
+  if (!text) return;
+  const pop = $('#notePopover');
+  pop.innerHTML =
+    `<div class="dict-head"><b>Note</b><button class="item-del" id="noteCloseBtn">✕</button></div>` +
+    `<p class="note-body">${esc(text)}</p>`;
+  pop.classList.remove('hidden');
+  pop.style.left = Math.max(12, Math.min(window.innerWidth - 342, x - 165)) + 'px';
+  pop.style.top = Math.min(window.innerHeight - 200, y + 14) + 'px';
+  $('#noteCloseBtn').addEventListener('click', hideNotePopover);
+}
+function hideNotePopover() {
+  $('#notePopover').classList.add('hidden');
+}
+
+/* ---------- Mode focus paragraphe ---------- */
+
+function setFocusPara(idx, scroll = true) {
+  if (!current) return;
+  current.focusPara = idx;
+  $$('#bookContent .pf-current').forEach((el) => el.classList.remove('pf-current'));
+  const el = $(`#bookContent [data-i="${idx}"]`);
+  if (!el) return;
+  el.classList.add('pf-current');
+  if (!scroll) return;
+  if (store.settings.flow === 'scroll') {
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  } else {
+    const page = Math.floor(colOf(el) / current.cols);
+    if (page !== current.page) goTo(page);
+  }
+}
+
+// Avance/recule d'un paragraphe (en sautant les images)
+function stepFocusPara(delta) {
+  if (!current) return;
+  let i = current.focusPara ?? (current.book.anchor ?? 0);
+  do { i += delta; } while (current.paras[i] && current.paras[i].type === 'img');
+  if (i >= 0 && i < current.paras.length) setFocusPara(i);
+}
+
 /* ---------- Plein écran & focus ---------- */
 
 async function toggleFullscreen() {
@@ -435,8 +502,14 @@ function onFullscreenChanged(on) {
 }
 
 function updateFocusRuler() {
-  const on = store.settings.focus && readerVisible();
+  const on = store.settings.focus === 'ruler' && readerVisible();
   $('#focusRuler').style.display = on ? 'block' : 'none';
+  const para = store.settings.focus === 'para' && readerVisible();
+  const c = $('#bookContent');
+  if (c) c.classList.toggle('parafocus', para);
+  if (para && current && current.focusPara == null) {
+    setFocusPara(current.book.anchor ?? 0, false);
+  }
 }
 
 /* ---------- Minuteur de lecture ---------- */

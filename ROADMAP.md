@@ -16,9 +16,8 @@ Backlog par thème ; les cases cochées sont déjà dans la version actuelle.
 
 - ~~v0.2 → v0.9 — moteur de lecture, annotations, OCR, confort, personnalisation,
   page Options, succès, stylet, mise à jour intégrée~~ ✅ livrés
-- **v1.0 — Rester dans le texte** : notes de bas de page en infobulle,
-  **lecture parallèle** (deux livres côte à côte), surlignage instantané,
-  mode focus paragraphe
+- ~~v1.0 — Rester dans le texte : notes de bas de page en infobulle, lecture
+  parallèle, surlignage instantané, mode focus paragraphe~~ ✅ livré
 - **v1.1 — Une bibliothèque sans limites** : formats MOBI/AZW3, FB2, CBZ
   (BD & manga), **recherche plein texte dans toute la bibliothèque**,
   collections nommées, affichage liste/étagère, tri intelligent
@@ -42,10 +41,11 @@ Backlog par thème ; les cases cochées sont déjà dans la version actuelle.
 - [x] Ouverture directe depuis la ligne de commande (`livre chemin.pdf`)
 - [x] Chargement interruptible des gros fichiers (barre de progression + bouton Interrompre)
 - [ ] Formats supplémentaires : MOBI / AZW3 (Kindle), FB2, CBZ (BD & manga)
-- [ ] **Lecture parallèle** : deux livres côte à côte en écran partagé
-      (une œuvre et son analyse, une VO et sa traduction…)
-- [ ] **Notes de bas de page en infobulle** : la note s'affiche dans un popover
-      au clic, sans jamais quitter sa page
+- [x] **Lecture parallèle** : deux livres côte à côte — volet compagnon en
+      défilement, position mémorisée, le principal se repagine
+- [x] **Notes de bas de page en infobulle** : appel de note cliquable, la note
+      s'affiche dans un popover sans jamais quitter sa page (EPUB natif,
+      PDF par détection des exposants et des petits corps de bas de page)
 - [ ] Coloration syntaxique du code (manuels techniques, livres d'informatique)
 
 ## ✍️ Annotations
@@ -56,8 +56,8 @@ Backlog par thème ; les cases cochées sont déjà dans la version actuelle.
 - [x] Dessin au stylet (croquis sur la page, pression gérée, galerie dans Notes)
 - [x] Export des annotations en Markdown
 - [x] Export des annotations en PDF (PDF de notes mis en page)
-- [ ] Surlignage instantané : un seul geste applique la dernière couleur
-      utilisée, sans passer par la palette
+- [x] Surlignage instantané : un seul geste applique la dernière couleur
+      utilisée, sans passer par la palette (bouton 🖍)
 - [ ] Synchronisation automatique des annotations entre appareils
       (l'import/export de bibliothèque permet déjà un transfert manuel)
 
@@ -75,8 +75,8 @@ Backlog par thème ; les cases cochées sont déjà dans la version actuelle.
 
 - [x] Bionic reading à intensité réglable
 - [x] Mode focus (règle de lecture)
-- [ ] Mode focus paragraphe : le paragraphe courant net, le reste estompé,
-      on avance au clic ou à la flèche
+- [x] Mode focus paragraphe : le paragraphe courant net, le reste estompé,
+      on avance au clic ou aux flèches ↑/↓
 - [x] Mode RSVP (un mot à la fois, point de fixation rouge, vitesse réglable,
       reprise à n'importe quel mot via un aperçu lisible cliquable, repères de
       chapitres sur la barre de progression)

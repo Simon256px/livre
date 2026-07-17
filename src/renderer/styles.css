@@ -646,6 +646,23 @@ body.fullscreen.peek .topbar { transform: translateY(0); opacity: 1; }
 #bookContent mark.hit       { background: rgba(228, 80, 46, .3); }
 #bookContent mark.hit.current { background: rgba(228, 80, 46, .6); outline: 2px solid var(--red); }
 
+/* Appels de note : petits exposants cliquables */
+#bookContent sup.noteref {
+  color: var(--blue);
+  font-weight: 700;
+  font-size: .72em;
+  cursor: pointer;
+  padding: 0 1px;
+}
+#bookContent sup.noteref:hover { text-decoration: underline; }
+
+/* Mode focus paragraphe : seul le paragraphe courant reste net */
+#bookContent.parafocus p,
+#bookContent.parafocus h2,
+#bookContent.parafocus figure { opacity: .22; transition: opacity .25s; }
+#bookContent.parafocus .pf-current { opacity: 1; }
+#bookContent.parafocus p { cursor: pointer; }
+
 .page-foot {
   display: flex;
   align-items: center;
@@ -1241,6 +1258,107 @@ body.fullscreen.peek .topbar { transform: translateY(0); opacity: 1; }
   0%, 100% { transform: translateY(0) rotate(-3deg); }
   50%      { transform: translateY(-14px) rotate(3deg); }
 }
+
+/* ─────────── Notes de bas de page ─────────── */
+#notePopover {
+  position: fixed;
+  z-index: 65;
+  width: 330px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 14px 16px;
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  background: var(--paper);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+#notePopover .note-body { margin: 4px 0 0; font-size: 13.5px; line-height: 1.5; }
+
+/* ─────────── Lecture parallèle ─────────── */
+#companionPane {
+  width: 38vw;
+  min-width: 320px;
+  height: 100%;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 20px;
+  box-shadow: 6px 6px 0 var(--ink);
+  overflow: hidden;
+}
+.companion-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 2px solid var(--ink);
+  background: var(--bg);
+}
+.companion-head .mono {
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#companionBody {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px 26px 30px;
+  font-size: 15.5px;
+  line-height: 1.7;
+}
+#companionBody p { margin: 0 0 .3em; text-indent: 1.4em; }
+#companionBody h2 {
+  font-family: var(--font-display);
+  font-size: 1.25em;
+  margin: 1.2em 0 .5em;
+  text-indent: 0;
+}
+#companionBody h2 + p { text-indent: 0; }
+#companionBody figure { margin: .8em 0; text-align: center; }
+#companionBody figure img {
+  max-width: 100%;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+}
+
+#companionPicker {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 82;
+  width: 420px;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 20px 22px;
+  border: 2px solid var(--ink);
+  border-radius: 20px;
+  background: var(--paper);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+#companionPicker ul { list-style: none; margin: 0; padding: 0; }
+#companionPicker li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 14px;
+  margin-bottom: 8px;
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  background: var(--bg);
+  box-shadow: 2px 2px 0 var(--ink);
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 14px;
+}
+#companionPicker li:hover { background: var(--hl-blue); }
 
 /* ─────────── Dessin au stylet ─────────── */
 #sketchLayer {

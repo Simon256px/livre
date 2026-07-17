@@ -14,6 +14,7 @@ const MAX_FIGS = 120; // limite d'images conservées par livre
 // césures) et détecte les titres par leur taille de police.
 async function extractPdf(pdf, onProgress) {
   const pages = [];
+  const footnotes = {};
   let figCount = 0;
   for (let i = 1; i <= pdf.numPages; i++) {
     throwIfCancelled();
@@ -32,13 +33,46 @@ async function extractPdf(pdf, onProgress) {
         const gap = x - cur.xEnd;
         const needSpace = cur.text && gap > h * 0.18 &&
           !cur.text.endsWith(' ') && !it.str.startsWith(' ');
-        cur.text += (needSpace ? ' ' : '') + it.str;
+        // Appel de note : nombre court nettement plus petit que la ligne,
+        // collé après du texte → marqueur sentinelle (résolu plus tard)
+        const sup = it.str.trim();
+        if (cur.h > 0 && h < cur.h * 0.8 && /^\d{1,3}$/.test(sup) && cur.text) {
+          cur.text += makeNoteMarker(`${i}:${sup}`, sup);
+        } else {
+          cur.text += (needSpace ? ' ' : '') + it.str;
+        }
         cur.xEnd = x + (it.width || 0);
         cur.h = Math.max(cur.h, h);
       }
       if (it.hasEOL) flush();
     }
     flush();
+    // Notes en bas de page : dernières lignes, nettement plus petites que
+    // le corps de la page, commençant par leur numéro
+    if (lines.length > 3) {
+      const hs = lines.map((l) => l.h).sort((a, b) => a - b);
+      const bodyH = hs[hs.length >> 1];
+      let cutoff = lines.length;
+      let currentNote = null;
+      for (let j = lines.length - 1; j >= Math.max(2, lines.length - 12); j--) {
+        const l = lines[j];
+        if (l.h >= bodyH * 0.87) break;
+        const m = l.text.trim().match(/^(\d{1,3})[\s.).:]\s*(.*)$/);
+        if (m) {
+          const prevText = currentNote ? ' ' + currentNote.text : '';
+          footnotes[`${i}:${m[1]}`] = (m[2] + prevText).replace(/\s+/g, ' ').trim();
+          currentNote = null;
+          cutoff = j;
+        } else if (j < lines.length - 1) {
+          // ligne de continuation d'une note multi-lignes
+          currentNote = { text: (l.text + (currentNote ? ' ' + currentNote.text : '')).trim() };
+          cutoff = j;
+        } else {
+          break;
+        }
+      }
+      if (cutoff < lines.length) lines.length = cutoff;
+    }
     const figs = figCount < MAX_FIGS ? await extractPageImages(page) : [];
     figCount += figs.length;
     pages.push({ lines, figs });
@@ -71,7 +105,7 @@ async function extractPdf(pdf, onProgress) {
   }));
 
   const allLines = kept.flatMap((p) => p.lines);
-  if (!allLines.length && !kept.some((p) => p.figs.length)) return { paras: [], words: 0 };
+  if (!allLines.length && !kept.some((p) => p.figs.length)) return { paras: [], words: 0, footnotes };
   const heights = allLines.map((l) => l.h).sort((a, b) => a - b);
   const medH = heights[heights.length >> 1] || 12;
   const gaps = [];
@@ -89,7 +123,12 @@ async function extractPdf(pdf, onProgress) {
   let figQueue = [];
   const flushPara = () => {
     const t = buf.replace(/\s+/g, ' ').trim();
-    if (t) paras.push({ type: 'p', text: t });
+    if (t) {
+      const { text, refs } = extractNoteMarkers(t);
+      const para = { type: 'p', text };
+      if (refs.length) para.notes = refs;
+      paras.push(para);
+    }
     buf = '';
     if (figQueue.length) { paras.push(...figQueue); figQueue = []; }
   };
@@ -104,7 +143,7 @@ async function extractPdf(pdf, onProgress) {
       const isHeading = l.h > medH * 1.3 && t.length < 90 && !/[.,;]$/.test(t);
       if (isHeading) {
         flushPara();
-        paras.push({ type: 'h', text: t });
+        paras.push({ type: 'h', text: extractNoteMarkers(t).text });
         prev = l;
         continue;
       }
@@ -135,7 +174,7 @@ async function extractPdf(pdf, onProgress) {
   flushPara();
 
   const words = paras.reduce((n, p) => n + (p.text ? p.text.split(/\s+/).length : 0), 0);
-  return { paras, words };
+  return { paras, words, footnotes };
 }
 
 // Les images décodées par pdf.js sont récupérées après getOperatorList.
@@ -314,33 +353,96 @@ async function extractEpub(buf, onProgress) {
     .map((r) => items[r.getAttribute('idref')])
     .filter((it) => it && /xhtml|html/.test(it.type));
 
-  const paras = [];
-  let figCount = 0;
+  // Passe 1 : parser tous les fichiers du flux, indexer les éléments à id
+  // (les notes peuvent vivre dans un autre fichier que leur appel)
+  const files = []; // { doc, fileDir, path }
+  const pathToIdx = {};
   for (let s = 0; s < spine.length; s++) {
     throwIfCancelled();
     const filePath = epubResolve(opfDir, spine[s].href);
     const f = zipEntry(zip, filePath);
-    if (!f) continue;
+    if (!f) { files.push(null); continue; }
     const fileDir = filePath.includes('/') ? filePath.slice(0, filePath.lastIndexOf('/') + 1) : '';
     const doc = new DOMParser().parseFromString(await f.async('string'), 'text/html');
-    for (const el of doc.body.querySelectorAll('h1,h2,h3,h4,p,li,img')) {
+    files.push({ doc, fileDir, path: filePath });
+    pathToIdx[filePath] = s;
+  }
+
+  // Passe 2 : repérer les appels de note, extraire le texte des notes,
+  // marquer les appels (sentinelles) et mémoriser les cibles à exclure
+  const footnotes = {};
+  const noteTargets = new Set(); // `${fileIdx}#${id}`
+  const cleanNote = (t) => t
+    .replace(/\s+/g, ' ')
+    .replace(/^\s*[\[(]?\d{1,3}[\]).:]?\s*/, '')
+    .replace(/\s*[↩⏎↑←]\s*$/, '')
+    .trim();
+  for (let s = 0; s < files.length; s++) {
+    const file = files[s];
+    if (!file) continue;
+    for (const a of file.doc.body.querySelectorAll('a[href]')) {
+      const href = a.getAttribute('href') || '';
+      if (!href.includes('#')) continue;
+      const [rel, frag] = href.split('#');
+      if (!frag) continue;
+      const targetIdx = rel ? pathToIdx[epubResolve(file.fileDir, rel)] : s;
+      const target = targetIdx !== undefined && files[targetIdx]
+        ? files[targetIdx].doc.getElementById(frag) : null;
+      if (!target) continue;
+      const et = (a.getAttribute('epub:type') || '') + ' ' + (a.getAttribute('role') || '');
+      const visible = a.textContent.trim();
+      const looksRef = /noteref|doc-noteref/.test(et) ||
+        (visible.length <= 5 && /^[\[(]?\d{1,3}[\])]?$|^[*†‡§]+$/.test(visible));
+      if (!looksRef) continue;
+      // le contenu de la note : l'élément cible, ou son bloc englobant
+      const block = target.closest('aside, li, p, div') || target;
+      const noteText = cleanNote(block.textContent || '');
+      if (!noteText) continue;
+      const key = `e${targetIdx}#${frag}`;
+      footnotes[key] = noteText;
+      noteTargets.add(`${targetIdx}#${(block.id || target.id || frag)}`);
+      noteTargets.add(`${targetIdx}#${frag}`);
+      a.textContent = makeNoteMarker(key, visible);
+    }
+  }
+
+  // Passe 3 : construire le flux, en sautant les blocs de notes
+  const paras = [];
+  let figCount = 0;
+  for (let s = 0; s < files.length; s++) {
+    throwIfCancelled();
+    const file = files[s];
+    if (!file) continue;
+    for (const el of file.doc.body.querySelectorAll('h1,h2,h3,h4,p,li,img')) {
       if (el.tagName === 'IMG') {
         if (figCount >= MAX_FIGS) continue;
         const src = el.getAttribute('src');
         if (!src) continue;
-        const data = src.startsWith('data:') ? src : await epubImgData(zip, epubResolve(fileDir, src));
+        const data = src.startsWith('data:') ? src : await epubImgData(zip, epubResolve(file.fileDir, src));
         if (data) { paras.push({ type: 'img', src: data }); figCount++; }
         continue;
       }
       if (el.tagName === 'LI' && el.querySelector('p')) continue;
-      const t = el.textContent.replace(/\s+/g, ' ').trim();
-      if (!t) continue;
-      paras.push(/^H[1-4]$/.test(el.tagName) ? { type: 'h', text: t } : { type: 'p', text: t });
+      // bloc de note (référencé par un appel) ou aside de notes → exclu du flux
+      const idHolder = el.id ? el : el.closest('[id]');
+      if (idHolder && noteTargets.has(`${s}#${idHolder.id}`)) continue;
+      const aside = el.closest('aside');
+      if (aside && /note/.test((aside.getAttribute('epub:type') || '') + (aside.getAttribute('role') || ''))) continue;
+      const raw = el.textContent.replace(/\s+/g, ' ').trim();
+      if (!raw) continue;
+      if (/^H[1-4]$/.test(el.tagName)) {
+        paras.push({ type: 'h', text: extractNoteMarkers(raw).text });
+      } else {
+        const { text, refs } = extractNoteMarkers(raw);
+        const para = { type: 'p', text };
+        if (refs.length) para.notes = refs;
+        paras.push(para);
+      }
     }
-    onProgress(s + 1, spine.length);
+    onProgress(s + 1, files.length);
   }
   const words = paras.reduce((n, p) => n + (p.text ? p.text.split(/\s+/).length : 0), 0);
-  return { paras, words };
+  return { paras, words, footnotes };
 }
 
 /* ---------- Contenu avec cache ---------- */
@@ -373,7 +475,13 @@ async function getContent(book) {
       pdf.destroy();
     }
   }
-  const data = { v: CACHE_V, paras: result.paras, words: result.words, ocr: !!result.ocr };
+  const data = {
+    v: CACHE_V,
+    paras: result.paras,
+    words: result.words,
+    footnotes: result.footnotes || {},
+    ocr: !!result.ocr,
+  };
   if (!skipCache) window.livre.saveCache(book.id, data);
   return data;
 }

@@ -91,7 +91,9 @@ function syncControls() {
   $('#bionicChk').checked = s.bionic;
   $('#intensityRange').value = s.bionicIntensity;
   $('#intensityVal').textContent = Math.round(s.bionicIntensity * 100) + ' %';
-  $('#focusChk').checked = s.focus;
+  $('#focusSelect').value = s.focus;
+  $('#instantHlChk').checked = s.instantHl;
+  $('#instantHlBtn').classList.toggle('on', s.instantHl);
   $('#dictChk').checked = s.dictOnline;
   $('#goalRange').value = s.dailyGoalMin;
   $('#goalVal').textContent = s.dailyGoalMin ? s.dailyGoalMin + ' min' : 'off';
@@ -100,7 +102,7 @@ function syncControls() {
   $('#pomoBreakRange').value = s.pomodoroBreak;
   $('#pomoBreakVal').textContent = s.pomodoroBreak + ' min';
   $('#bionicBtn').classList.toggle('on', s.bionic);
-  $('#focusBtn').classList.toggle('on', s.focus);
+  $('#focusBtn').classList.toggle('on', s.focus !== 'off');
   updateFocusRuler();
 }
 
@@ -210,10 +212,24 @@ function buildUI() {
     store.settings.bionic = !store.settings.bionic;
     applySettings(true);
   });
+  // le bouton ▤ fait défiler les trois modes focus
   $('#focusBtn').addEventListener('click', () => {
-    store.settings.focus = !store.settings.focus;
+    const order = ['off', 'ruler', 'para'];
+    const next = order[(order.indexOf(store.settings.focus) + 1) % order.length];
+    store.settings.focus = next;
     applySettings(false);
+    toast(next === 'off' ? 'Focus désactivé' : next === 'ruler' ? 'Focus : règle de lecture' : 'Focus : paragraphe (↑/↓)');
   });
+  $('#instantHlBtn').addEventListener('click', () => {
+    store.settings.instantHl = !store.settings.instantHl;
+    applySettings(false);
+    toast(store.settings.instantHl
+      ? '🖍 Surlignage instantané : sélectionne du texte pour surligner'
+      : 'Surlignage instantané désactivé');
+  });
+  $('#companionBtn').addEventListener('click', toggleCompanionPicker);
+  $('#companionCloseBtn').addEventListener('click', closeCompanion);
+  $('#companionBody').addEventListener('scroll', debounce(saveCompanionPos, 400));
   $('#fullscreenBtn').addEventListener('click', toggleFullscreen);
   $('#settingsBtn').addEventListener('click', () => openOptions());
   $('#prevBtn').addEventListener('click', () => turnPage(-1));
@@ -375,8 +391,12 @@ function buildUI() {
     store.settings.bionicIntensity = Number(e.target.value);
     applySettings(store.settings.bionic);
   });
-  $('#focusChk').addEventListener('change', (e) => {
-    store.settings.focus = e.target.checked;
+  $('#focusSelect').addEventListener('change', (e) => {
+    store.settings.focus = e.target.value;
+    applySettings(false);
+  });
+  $('#instantHlChk').addEventListener('change', (e) => {
+    store.settings.instantHl = e.target.checked;
     applySettings(false);
   });
   $('#dictChk').addEventListener('change', (e) => {
@@ -415,10 +435,22 @@ function buildUI() {
     if (id) deleteAnnotation(id);
   });
   $('#bookContent').addEventListener('click', (e) => {
+    const ref = e.target.closest('sup.noteref');
+    if (ref) {
+      e.stopPropagation();
+      showNotePopover(ref.dataset.note, e.clientX, e.clientY);
+      return;
+    }
     const mark = e.target.closest('mark.hl');
     if (mark && getSelection().isCollapsed) {
       e.stopPropagation();
       showAnnPopover(mark.dataset.ann, e.clientX, e.clientY);
+      return;
+    }
+    // mode focus paragraphe : cliquer un paragraphe le rend courant
+    if (store.settings.focus === 'para') {
+      const p = e.target.closest('#bookContent > [data-i]');
+      if (p && getSelection().isCollapsed) setFocusPara(Number(p.dataset.i), false);
     }
   });
   // Double-clic sur un mot → dictionnaire
@@ -434,6 +466,10 @@ function buildUI() {
     if (!e.target.closest('#annPopover') && !e.target.closest('mark.hl')) hideAnnPopover();
     if (!e.target.closest('#hlToolbar') && !e.target.closest('#bookContent')) hideHlToolbar();
     if (!e.target.closest('#dictPopover') && !e.target.closest('#bookContent')) hideDictPopover();
+    if (!e.target.closest('#notePopover') && !e.target.closest('sup.noteref')) hideNotePopover();
+    if (!e.target.closest('#companionPicker') && !e.target.closest('#companionBtn')) {
+      $('#companionPicker').classList.add('hidden');
+    }
   });
 
   /* --- RSVP --- */
@@ -510,6 +546,10 @@ function buildUI() {
     if (!readerVisible() || !current) return;
     if (e.key === 'f' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); openSearch(); }
     else if (e.key === 'F11') { e.preventDefault(); toggleFullscreen(); }
+    else if (store.settings.focus === 'para' && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+      e.preventDefault();
+      stepFocusPara(e.key === 'ArrowDown' ? 1 : -1);
+    }
     else if (e.key === 'ArrowRight' || e.key === 'PageDown' || (e.key === ' ' && !e.shiftKey)) {
       e.preventDefault();
       turnPage(1);
@@ -519,6 +559,8 @@ function buildUI() {
     } else if (e.key === 'Escape') {
       if (!$('#sketchView').classList.contains('hidden')) hideSketchView();
       else if (sketchVisible()) sketchClose(false);
+      else if (!$('#companionPicker').classList.contains('hidden')) $('#companionPicker').classList.add('hidden');
+      else if (noteVisible()) hideNotePopover();
       else if (dictVisible()) hideDictPopover();
       else if (!$('#hlToolbar').classList.contains('hidden')) hideHlToolbar();
       else if (!$('#searchBar').classList.contains('hidden')) closeSearch();
@@ -545,7 +587,7 @@ function buildUI() {
     if (document.body.classList.contains('fullscreen')) {
       document.body.classList.toggle('peek', e.clientY < 60);
     }
-    if (!store.settings.focus || !readerVisible()) return;
+    if (store.settings.focus !== 'ruler' || !readerVisible()) return;
     const y = e.clientY;
     $('#focusRuler').style.background =
       `linear-gradient(to bottom, var(--dim) 0px, var(--dim) ${y - 46}px,` +
@@ -609,6 +651,10 @@ function buildUI() {
     store.settings.custom = { ...DEFAULT_SETTINGS.custom, ...(store.settings.custom || {}) };
     store.settings.customFonts = store.settings.customFonts || [];
     store.achievements = store.achievements || {};
+    // focus était un booléen avant la v1.0
+    if (typeof store.settings.focus === 'boolean') {
+      store.settings.focus = store.settings.focus ? 'ruler' : 'off';
+    }
   }
   // Ré-enregistre les polices importées avant de bâtir l'interface
   store.settings.customFonts.forEach((f) => registerCustomFont(f.name, f.data));
