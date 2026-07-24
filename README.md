@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="build/icon.png" alt="MontLivre" width="160">
-</p>
-
 <h1 align="center">MontLivre</h1>
 
 <p align="center"><strong>Un lecteur élégant qui transforme vos PDF et EPUB en véritable expérience de lecture.</strong></p>
